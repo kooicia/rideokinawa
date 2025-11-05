@@ -1204,7 +1204,7 @@ export default function AdminPage() {
 
                             try {
                               const newItinerary = [...data.itinerary];
-                              const newPhotos = [...(newItinerary[index].photos || [])];
+                              const newPhotos: string[] = [...((newItinerary[index].photos || []) as string[])];
                               
                               // Process all files
                               for (const file of filesToProcess) {
@@ -1212,10 +1212,7 @@ export default function AdminPage() {
                                 newPhotos.push(base64String);
                               }
                               
-                              newItinerary[index] = {
-                                ...newItinerary[index],
-                                photos: newPhotos,
-                              };
+                              (newItinerary[index] as any).photos = newPhotos;
                               setData({ ...data, itinerary: newItinerary });
                               
                               // Clear input
@@ -1268,12 +1265,9 @@ export default function AdminPage() {
                                           // Compress and convert to base64
                                           const base64String = await compressImage(file, 1200, 1200, 0.7);
                                           const newItinerary = [...data.itinerary];
-                                          const newPhotos = [...(newItinerary[index].photos || [])];
+                                          const newPhotos: string[] = [...((newItinerary[index].photos || []) as string[])];
                                           newPhotos[photoIndex] = base64String;
-                                          newItinerary[index] = {
-                                            ...newItinerary[index],
-                                            photos: newPhotos,
-                                          };
+                                          (newItinerary[index] as any).photos = newPhotos;
                                           setData({ ...data, itinerary: newItinerary });
                                         } catch (error) {
                                           console.error("Error compressing image:", error);
@@ -1294,12 +1288,9 @@ export default function AdminPage() {
                                     value={photo?.startsWith('data:') ? '' : photo || ''}
                                     onChange={(e) => {
                                       const newItinerary = [...data.itinerary];
-                                      const newPhotos = [...(newItinerary[index].photos || [])];
+                                      const newPhotos: string[] = [...((newItinerary[index].photos || []) as string[])];
                                       newPhotos[photoIndex] = e.target.value;
-                                      newItinerary[index] = {
-                                        ...newItinerary[index],
-                                        photos: newPhotos,
-                                      };
+                                      (newItinerary[index] as any).photos = newPhotos;
                                       setData({ ...data, itinerary: newItinerary });
                                     }}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
@@ -1310,12 +1301,9 @@ export default function AdminPage() {
                                 <button
                                   onClick={() => {
                                     const newItinerary = [...data.itinerary];
-                                    const newPhotos = [...(newItinerary[index].photos || [])];
+                                    const newPhotos: string[] = [...((newItinerary[index].photos || []) as string[])];
                                     newPhotos.splice(photoIndex, 1);
-                                    newItinerary[index] = {
-                                      ...newItinerary[index],
-                                      photos: newPhotos,
-                                    };
+                                    (newItinerary[index] as any).photos = newPhotos;
                                     setData({ ...data, itinerary: newItinerary });
                                   }}
                                   className="flex items-center gap-1 px-3 py-1.5 text-xs text-red-600 hover:text-red-800 border border-red-300 rounded-lg hover:bg-red-50"
@@ -1333,10 +1321,7 @@ export default function AdminPage() {
                               const newItinerary = [...data.itinerary];
                               const newPhotos = [...(newItinerary[index].photos || [])];
                               newPhotos.push("");
-                              newItinerary[index] = {
-                                ...newItinerary[index],
-                                photos: newPhotos,
-                              };
+                              (newItinerary[index] as any).photos = newPhotos;
                               setData({ ...data, itinerary: newItinerary });
                             }}
                             className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -1424,14 +1409,12 @@ export default function AdminPage() {
                           <button
                             onClick={() => {
                               const newItinerary = [...data.itinerary];
-                              newItinerary[index] = {
-                                ...newItinerary[index],
-                                hotel: {
-                                  name: "",
-                                  address: "",
-                                  phone: "",
-                                  photos: [],
-                                },
+                              (newItinerary[index] as any).hotel = {
+                                name: "",
+                                address: "",
+                                phone: "",
+                                photos: [] as string[],
+                                url: "",
                               };
                               setData({ ...data, itinerary: newItinerary });
                             }}
@@ -1445,10 +1428,7 @@ export default function AdminPage() {
                           <button
                             onClick={() => {
                               const newItinerary = [...data.itinerary];
-                              newItinerary[index] = {
-                                ...newItinerary[index],
-                                hotel: null,
-                              };
+                              (newItinerary[index] as any).hotel = null;
                               setData({ ...data, itinerary: newItinerary });
                             }}
                             className="flex items-center gap-2 px-3 py-1.5 text-xs sm:text-sm text-red-600 hover:text-red-800 border border-red-300 rounded-lg hover:bg-red-50"
@@ -1560,7 +1540,7 @@ export default function AdminPage() {
                                   try {
                                     const newItinerary = [...data.itinerary];
                                     const currentDay = newItinerary[index] as any;
-                                    const newPhotos = [...(currentDay.hotel?.photos || [])];
+                                    const newPhotos: string[] = [...((currentDay.hotel?.photos || []) as string[])];
                                     
                                     // Process all files
                                     for (const file of filesToProcess) {

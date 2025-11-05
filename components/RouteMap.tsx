@@ -563,7 +563,7 @@ export default function RouteMap({ route, distance, elevationGain, dayType, coor
       // Sample points if too many (limit to ~100 points)
       const sampleSize = Math.min(100, validCoords.length);
       const step = Math.max(1, Math.floor(validCoords.length / sampleSize));
-      const sampledCoords = [];
+      const sampledCoords: Array<{ lat: number; lng: number }> = [];
       
       // Sample coordinates evenly
       for (let i = 0; i < validCoords.length; i += step) {
