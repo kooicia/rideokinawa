@@ -1,0 +1,342 @@
+{
+  "overview": {
+    "title": "Ride Okinawa",
+    "destination": "Okinawa, Japan",
+    "days": 8,
+    "totalDistance": 380,
+    "elevationGain": 2663,
+    "elevationDrop": 2691,
+    "description": "Experience the beauty of Okinawa on this 7-day cycling adventure through tropical landscapes, historic sites, and pristine beaches."
+  },
+  "itinerary": [
+    {
+      "day": 1,
+      "date": "2025-11-23",
+      "title": "抵達暖身 — 探索那霸",
+      "departureTime": "09:00",
+      "distance": 35,
+      "elevationGain": 200,
+      "route": "桃園機場 → 那霸機場 → 那霸市區",
+      "meals": {
+        "breakfast": "X",
+        "lunch": "自理",
+        "dinner": "自理"
+      },
+      "hotel": {
+        "name": "Comfort Inn Naha Tomari Port",
+        "address": "1-2-1 Kume, Naha, Okinawa",
+        "phone": "+81-98-862-1111"
+      },
+      "highlights": [
+        "國際通街景與夜市攤位",
+        "牧志公設市場，體驗在地食材與小吃",
+        "租借自行車和檢查"
+      ],
+      "photos": [
+        "/photos/day1-1.jpg",
+        "/photos/day1-2.jpg"
+      ],
+      "notes": "",
+      "dayType": "arrival",
+      "flight": {
+        "flightNumber": "CI120",
+        "details": "台北 - 沖繩",
+        "time": "08:15",
+        "departureTime": "08:15",
+        "arrivalTime": "10:45"
+      },
+      "description": "抵達那霸、辦理入住，逛國際通與牧志公設市場，嘗沖繩麵與塔可飯，並整理自行車，為明天上路做準備。"
+    },
+    {
+      "day": 2,
+      "date": "2025-11-24",
+      "title": "西岸藍色長征：那霸 → 名護",
+      "departureTime": "08:00",
+      "distance": 67,
+      "elevationGain": 300,
+      "route": "那霸 → 名護",
+      "meals": {
+        "breakfast": "Hotel",
+        "lunch": "Beachside cafe in Itoman",
+        "dinner": "Hotel restaurant"
+      },
+      "hotel": {
+        "name": "Hotel Yugaf Inn Okinawa",
+        "address": "123 Beach Road, Itoman, Okinawa",
+        "phone": "+81-98-997-1111"
+      },
+      "highlights": [
+        "長段海岸線，海景連綿",
+        "殘波岬燈塔與懸崖（壯闊海景）",
+        "抵達名護，晚間有在地餐飲選擇"
+      ],
+      "photos": [
+        "/photos/day2-1.jpg",
+        "/photos/day2-2.jpg"
+      ],
+      "notes": "",
+      "description": "清晨沿58號國道向北出發，長段海景、公路與海灘停靠，攝影機會多。午後抵達名護市。"
+    },
+    {
+      "day": 3,
+      "date": "2025-11-25",
+      "title": "水族館與珊瑚海岸",
+      "departureTime": "07:30",
+      "distance": 45,
+      "elevationGain": 245,
+      "route": "名護 → 屋我地島",
+      "meals": {
+        "breakfast": "飯店早餐",
+        "lunch": "Mountain view restaurant",
+        "dinner": "Local izakaya"
+      },
+      "hotel": {
+        "name": "Cyclo Villa / Kokopelli House Nago",
+        "address": "456 Hill Avenue, Kadena, Okinawa",
+        "phone": "+81-98-956-2222"
+      },
+      "highlights": [
+        "沖繩美ら海水族館（大型水槽與鯨鯊）— 今日重點",
+        "本部／屋我地島的海岬與翡翠海灘",
+        "小漁港與漁村街景"
+      ],
+      "photos": [
+        "/photos/day3-1.jpg",
+        "/photos/day3-2.jpg"
+      ],
+      "notes": "Challenging day with significant elevation. Take breaks as needed.",
+      "description": "早上騎較短距離，安排數小時參觀沖繩美ら海水族館（建議2–3小時）。後續沿珊瑚海岸至屋我地島地區散步與拍照"
+    },
+    {
+      "day": 4,
+      "date": "2024-03-18",
+      "title": "Northern Peninsula",
+      "departureTime": "08:00",
+      "distance": 70,
+      "elevationGain": 600,
+      "route": "Kadena → Nago → Cape Hedo",
+      "meals": {
+        "breakfast": "Hotel",
+        "lunch": "Cape Hedo restaurant",
+        "dinner": "Hotel buffet"
+      },
+      "hotel": {
+        "name": "Cape Hedo View Hotel",
+        "address": "789 Cape Road, Nago, Okinawa",
+        "phone": "+81-98-943-3333"
+      },
+      "highlights": [
+        "Cape Hedo (northernmost point)",
+        "Ocean views",
+        "Sunset dinner"
+      ],
+      "photos": [
+        "/photos/day4-1.jpg",
+        "/photos/day4-2.jpg"
+      ],
+      "notes": "Beautiful coastal route. Watch for wind on exposed sections."
+    },
+    {
+      "day": 5,
+      "date": "2024-03-19",
+      "title": "East Coast Discovery",
+      "departureTime": "08:30",
+      "distance": 60,
+      "elevationGain": 400,
+      "route": "Nago → Higashi → Ginoza",
+      "meals": {
+        "breakfast": "Hotel",
+        "lunch": "Beachside restaurant",
+        "dinner": "Hotel"
+      },
+      "hotel": {
+        "name": "East Coast Resort",
+        "address": "321 Ocean Drive, Higashi, Okinawa",
+        "phone": "+81-98-923-4444"
+      },
+      "highlights": [
+        "Pristine beaches",
+        "Tropical forests",
+        "Local markets"
+      ],
+      "photos": [
+        "/photos/day5-1.jpg",
+        "/photos/day5-2.jpg"
+      ],
+      "notes": "Relaxing day with plenty of time for beach stops."
+    },
+    {
+      "day": 6,
+      "date": "2024-03-20",
+      "title": "Island Loop",
+      "departureTime": "07:00",
+      "distance": 90,
+      "elevationGain": 700,
+      "route": "Higashi → Uruma → Naha",
+      "meals": {
+        "breakfast": "Hotel",
+        "lunch": "Uruma city center",
+        "dinner": "Celebration dinner in Naha"
+      },
+      "hotel": {
+        "name": "Naha Grand Hotel",
+        "address": "1-2-1 Kume, Naha, Okinawa",
+        "phone": "+81-98-862-1111"
+      },
+      "highlights": [
+        "Full island loop",
+        "Final celebration",
+        "Group photos"
+      ],
+      "photos": [
+        "/photos/day6-1.jpg",
+        "/photos/day6-2.jpg"
+      ],
+      "notes": "Longest day. Early start recommended. Celebration dinner in evening."
+    },
+    {
+      "day": 7,
+      "date": "2024-03-21",
+      "title": "Departure",
+      "departureTime": null,
+      "distance": 0,
+      "elevationGain": 0,
+      "route": "Hotel → Airport",
+      "meals": {
+        "breakfast": "Hotel",
+        "lunch": null,
+        "dinner": null
+      },
+      "hotel": null,
+      "highlights": [
+        "Farewell breakfast",
+        "Group departure"
+      ],
+      "photos": [],
+      "notes": "Departure day. Airport transfers arranged."
+    }
+  ],
+  "importantNotes": [
+    {
+      "category": "Safety",
+      "items": [
+        "Always wear a helmet while cycling",
+        "Follow traffic rules and signals",
+        "Stay hydrated - drink water every 30 minutes",
+        "Use hand signals when turning or stopping",
+        "Keep emergency contact numbers accessible"
+      ]
+    },
+    {
+      "category": "Health",
+      "items": [
+        "Bring sunscreen (SPF 50+) and reapply every 2 hours",
+        "Pack insect repellent for tropical areas",
+        "Stay hydrated - minimum 2 liters water per day",
+        "Inform guides of any medical conditions",
+        "Pack personal medications"
+      ]
+    },
+    {
+      "category": "Bike & Equipment",
+      "items": [
+        "Daily bike check before departure",
+        "Carry spare tube and basic tools",
+        "Keep bike locked when not in use",
+        "Report any mechanical issues immediately",
+        "Bike fitting session on Day 1"
+      ]
+    },
+    {
+      "category": "Weather",
+      "items": [
+        "Check daily weather forecast",
+        "Pack rain gear (lightweight jacket)",
+        "Temperatures range from 18-28°C (65-82°F)",
+        "High humidity - moisture-wicking clothing recommended",
+        "Afternoon showers possible - quick-dry clothing"
+      ]
+    },
+    {
+      "category": "Cultural",
+      "items": [
+        "Respect local customs and traditions",
+        "Remove shoes when entering temples or homes",
+        "Learn basic Japanese phrases (hello, thank you)",
+        "Be mindful of photography restrictions",
+        "Tipping is not customary in Japan"
+      ]
+    }
+  ],
+  "packingList": {
+    "essentials": [
+      "Cycling helmet (mandatory)",
+      "Cycling shorts (2-3 pairs)",
+      "Moisture-wicking jerseys (3-4)",
+      "Cycling shoes",
+      "Water bottles (2 minimum)",
+      "Bike repair kit (provided but personal preference items welcome)"
+    ],
+    "clothing": [
+      "Lightweight rain jacket",
+      "Arm warmers/leg warmers",
+      "Casual clothes for evenings (2-3 outfits)",
+      "Comfortable walking shoes",
+      "Sandals/flip-flops",
+      "Swimwear"
+    ],
+    "accessories": [
+      "Sunglasses with UV protection",
+      "Cycling gloves",
+      "Sun hat or cap",
+      "Sunscreen (SPF 50+)",
+      "Insect repellent",
+      "Personal toiletries",
+      "First aid kit (basic)",
+      "Camera or smartphone",
+      "Portable charger"
+    ],
+    "documents": [
+      "Passport (valid for 6+ months)",
+      "Travel insurance documents",
+      "Emergency contact information",
+      "Medical information card",
+      "Copy of itinerary"
+    ]
+  },
+  "weather": {
+    "location": "Naha",
+    "latitude": 26.2124,
+    "longitude": 127.6809
+  },
+  "additionalInfo": {
+    "emergencyContacts": [
+      {
+        "name": "Tour Guide",
+        "phone": "+81-90-1234-5678",
+        "role": "Primary contact"
+      },
+      {
+        "name": "Emergency Services",
+        "phone": "110 (Police) / 119 (Fire/Ambulance)",
+        "role": "Local emergency"
+      },
+      {
+        "name": "Tour Support",
+        "phone": "+81-98-123-4567",
+        "role": "24/7 support line"
+      }
+    ],
+    "tips": [
+      "Start each day with a good breakfast",
+      "Pace yourself - it's a tour, not a race",
+      "Take time to enjoy the scenery and local culture",
+      "Stay with the group or inform guides if separating",
+      "Keep devices charged for GPS and communication",
+      "Try local Okinawan specialties like goya champuru and taco rice"
+    ],
+    "fitnessLevel": "Moderate to Advanced",
+    "groupSize": "8-12 participants",
+    "supportVehicle": "Available for luggage transport and emergencies"
+  }
+}
