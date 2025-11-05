@@ -1,8 +1,12 @@
+"use client";
+
 import { AlertTriangle, Heart, Bike, Cloud, Users } from "lucide-react";
 import tourData from "@/data/tour-data.json";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function NotesPage() {
   const { importantNotes, additionalInfo } = tourData;
+  const { t } = useLanguage();
 
   const categoryIcons: { [key: string]: any } = {
     Safety: AlertTriangle,
@@ -17,10 +21,10 @@ export default function NotesPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
-            Important Notes
+            {t.notes.title}
           </h1>
           <p className="text-base sm:text-lg text-gray-600">
-            Essential information for a safe and enjoyable tour
+            {t.notes.subtitle}
           </p>
         </div>
 
@@ -62,7 +66,7 @@ export default function NotesPage() {
           {additionalInfo.emergencyContacts && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 sm:p-6">
               <h2 className="font-playfair text-xl sm:text-2xl font-semibold text-red-900 mb-3 sm:mb-4">
-                Emergency Contacts
+                {t.notes.emergencyContacts}
               </h2>
               <div className="space-y-2 sm:space-y-3">
                 {additionalInfo.emergencyContacts.map((contact, index) => (
@@ -86,22 +90,22 @@ export default function NotesPage() {
           {/* Tour Details */}
           <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-              <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-2 sm:mb-3">Tour Details</h3>
+              <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-2 sm:mb-3">{t.notes.tourDetails}</h3>
               <div className="space-y-2 text-xs sm:text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Fitness Level:</span>
+                  <span className="text-gray-600">{t.notes.fitnessLevel}</span>
                   <span className="font-medium text-gray-900 text-right">
                     {additionalInfo.fitnessLevel}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Group Size:</span>
+                  <span className="text-gray-600">{t.notes.groupSize}</span>
                   <span className="font-medium text-gray-900 text-right">
                     {additionalInfo.groupSize}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Support Vehicle:</span>
+                  <span className="text-gray-600">{t.notes.supportVehicle}</span>
                   <span className="font-medium text-gray-900 text-right">
                     {additionalInfo.supportVehicle}
                   </span>
@@ -111,7 +115,7 @@ export default function NotesPage() {
 
             {/* Tips */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6">
-              <h3 className="font-semibold text-sm sm:text-base text-blue-900 mb-2 sm:mb-3">Tips for Success</h3>
+              <h3 className="font-semibold text-sm sm:text-base text-blue-900 mb-2 sm:mb-3">{t.notes.tipsForSuccess}</h3>
               <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-blue-800">
                 {additionalInfo.tips.map((tip, index) => (
                   <li key={index} className="flex items-start gap-2">

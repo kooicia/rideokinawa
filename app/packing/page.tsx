@@ -1,28 +1,32 @@
+"use client";
+
 import { CheckCircle, Package, Shirt, Wrench, FileText } from "lucide-react";
 import tourData from "@/data/tour-data.json";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function PackingPage() {
   const { packingList } = tourData;
+  const { t } = useLanguage();
 
   const categories = [
     {
       icon: Package,
-      title: "Essentials",
+      title: t.packing.essentials,
       items: packingList.essentials,
     },
     {
       icon: Shirt,
-      title: "Clothing",
+      title: t.packing.clothing,
       items: packingList.clothing,
     },
     {
       icon: Wrench,
-      title: "Accessories",
+      title: t.packing.accessories,
       items: packingList.accessories,
     },
     {
       icon: FileText,
-      title: "Documents",
+      title: t.packing.documents,
       items: packingList.documents,
     },
   ];
@@ -32,10 +36,10 @@ export default function PackingPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
-            Packing Recommendations
+            {t.packing.title}
           </h1>
           <p className="text-base sm:text-lg text-gray-600">
-            Essential items to pack for your bike tour
+            {t.packing.subtitle}
           </p>
         </div>
 
@@ -71,7 +75,7 @@ export default function PackingPage() {
         </div>
 
         <div className="mt-8 sm:mt-12 bg-amber-50 border border-amber-200 rounded-lg p-4 sm:p-6">
-          <h3 className="font-semibold text-sm sm:text-base text-amber-900 mb-2 sm:mb-3">Packing Tips</h3>
+          <h3 className="font-semibold text-sm sm:text-base text-amber-900 mb-2 sm:mb-3">{t.packing.tips}</h3>
           <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-amber-800">
             <li>• Pack lightweight, moisture-wicking clothing for cycling</li>
             <li>• Use packing cubes to organize your gear</li>

@@ -3,19 +3,25 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bike, Calendar, Cloud, Package, Info, Settings, Menu, X } from "lucide-react";
+import { Bike, Calendar, Cloud, Package, Info, Settings, Menu, X, Globe } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Navigation() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { t, language, setLanguage } = useLanguage();
   
   const navItems = [
-    { href: "/", label: "Overview", icon: Bike },
-    { href: "/itinerary", label: "Itinerary", icon: Calendar },
-    { href: "/weather", label: "Weather", icon: Cloud },
-    { href: "/packing", label: "Packing", icon: Package },
-    { href: "/notes", label: "Notes", icon: Info },
+    { href: "/", label: t.nav.overview, icon: Bike },
+    { href: "/itinerary", label: t.nav.itinerary, icon: Calendar },
+    { href: "/weather", label: t.nav.weather, icon: Cloud },
+    { href: "/packing", label: t.nav.packing, icon: Package },
+    { href: "/notes", label: t.nav.notes, icon: Info },
   ];
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'en' ? 'zh-TW' : 'en');
+  };
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -25,7 +31,7 @@ export default function Navigation() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
+    <nav className="fixed top-0 left-0 right-0 z-[9999] bg-white/95 backdrop-blur-sm border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link 
@@ -33,7 +39,7 @@ export default function Navigation() {
             className="font-playfair text-lg sm:text-xl font-semibold text-gray-900"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Okinawa Bike Tour
+            {language === 'zh-TW' ? '沖繩單車之旅' : 'Okinawa Bike Tour'}
           </Link>
           
           {/* Desktop Navigation */}
@@ -59,12 +65,20 @@ export default function Navigation() {
 
           {/* Desktop Admin + Mobile Menu Button */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={toggleLanguage}
+              className="hidden sm:flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              title={language === 'en' ? '切換到繁體中文' : 'Switch to English'}
+            >
+              <Globe className="w-4 h-4" />
+              <span className="hidden lg:inline">{language === 'en' ? 'EN' : '繁'}</span>
+            </button>
             <Link
               href="/admin"
               className="hidden sm:flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             >
               <Settings className="w-4 h-4" />
-              <span className="hidden lg:inline">Admin</span>
+              <span className="hidden lg:inline">{t.nav.admin}</span>
             </Link>
             
             {/* Mobile Menu Button */}
@@ -104,13 +118,23 @@ export default function Navigation() {
                   </Link>
                 );
               })}
+              <button
+                onClick={() => {
+                  toggleLanguage();
+                  setMobileMenuOpen(false);
+                }}
+                className="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-t border-gray-200 mt-2 pt-3"
+              >
+                <Globe className="w-5 h-5" />
+                <span>{language === 'en' ? '繁體中文' : 'English'}</span>
+              </button>
               <Link
                 href="/admin"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-t border-gray-200 mt-2 pt-3"
+                className="flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50"
               >
                 <Settings className="w-5 h-5" />
-                <span>Admin</span>
+                <span>{t.nav.admin}</span>
               </Link>
             </div>
           </div>

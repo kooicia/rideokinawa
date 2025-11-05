@@ -42,3 +42,24 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+/* Ensure Leaflet map tiles are visible and below the header */
+.leaflet-container {
+  z-index: 1 !important;
+}
+
+.leaflet-pane {
+  z-index: 1 !important;
+}
+
+.leaflet-tile-pane {
+  z-index: 1 !important;
+}
+
+.leaflet-overlay-pane {
+  z-index: 2 !important;
+}
+
+.leaflet-control {
+  z-index: 3 !important;
+}
