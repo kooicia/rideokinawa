@@ -1841,9 +1841,9 @@ export default function AdminPage() {
                                 const currentItem = newNotes[catIndex].items[itemIndex];
                                 if (typeof currentItem === 'string') {
                                   // Convert string to object
-                                  newNotes[catIndex].items[itemIndex] = { en: e.target.value, zh: '' };
+                                  (newNotes[catIndex].items as any)[itemIndex] = { en: e.target.value, zh: '' };
                                 } else {
-                                  newNotes[catIndex].items[itemIndex] = { ...currentItem, en: e.target.value };
+                                  (newNotes[catIndex].items as any)[itemIndex] = { ...(currentItem as any), en: e.target.value };
                                 }
                                 setData({ ...data, importantNotes: newNotes });
                               }}
@@ -1862,9 +1862,9 @@ export default function AdminPage() {
                                 const currentItem = newNotes[catIndex].items[itemIndex];
                                 if (typeof currentItem === 'string') {
                                   // Convert string to object
-                                  newNotes[catIndex].items[itemIndex] = { en: currentItem, zh: e.target.value };
+                                  (newNotes[catIndex].items as any)[itemIndex] = { en: currentItem, zh: e.target.value };
                                 } else {
-                                  newNotes[catIndex].items[itemIndex] = { ...currentItem, zh: e.target.value };
+                                  (newNotes[catIndex].items as any)[itemIndex] = { ...(currentItem as any), zh: e.target.value };
                                 }
                                 setData({ ...data, importantNotes: newNotes });
                               }}
@@ -1888,7 +1888,7 @@ export default function AdminPage() {
                   <button
                     onClick={() => {
                       const newNotes = [...data.importantNotes];
-                      newNotes[catIndex].items.push({ en: '', zh: '' });
+                      (newNotes[catIndex].items as any[]).push({ en: '', zh: '' });
                       setData({ ...data, importantNotes: newNotes });
                     }}
                     className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg"
