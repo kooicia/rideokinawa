@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Save, Edit, Plus, Trash2, X, Lock, LogOut, Upload } from "lucide-react";
+import { Save, Edit, Plus, Trash2, X, Lock, LogOut, Upload, GripVertical } from "lucide-react";
 import tourData from "@/data/tour-data.json";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { parseGPXToCoordinates, simplifyCoordinates } from "@/lib/gpxParser";
@@ -16,6 +16,7 @@ export default function AdminPage() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingOverview, setEditingOverview] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [draggedHighlightIndex, setDraggedHighlightIndex] = useState<{ dayIndex: number; highlightIndex: number } | null>(null);
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -345,7 +346,7 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="min-h-screen pt-16 bg-gray-50">
+    <div className="min-h-screen pt-16 pb-16 md:pb-0 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -1069,110 +1070,195 @@ export default function AdminPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {t.itinerary.highlights} (English)
+                        {t.itinerary.highlights}
                       </label>
-                      <div className="space-y-2">
-                        {(day.highlights || []).map((highlight, highlightIndex) => (
-                          <div key={highlightIndex} className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={highlight}
-                              onChange={(e) => {
-                                const newItinerary = [...data.itinerary];
-                                const newHighlights = [...(newItinerary[index].highlights || [])];
-                                newHighlights[highlightIndex] = e.target.value;
-                                newItinerary[index] = {
-                                  ...newItinerary[index],
-                                  highlights: newHighlights,
-                                };
-                                setData({ ...data, itinerary: newItinerary });
-                              }}
-                              className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
-                            />
-                            <button
-                              onClick={() => {
-                                const newItinerary = [...data.itinerary];
-                                const newHighlights = [...(newItinerary[index].highlights || [])];
-                                newHighlights.splice(highlightIndex, 1);
-                                newItinerary[index] = {
-                                  ...newItinerary[index],
-                                  highlights: newHighlights,
-                                };
-                                setData({ ...data, itinerary: newItinerary });
-                              }}
-                              className="p-2 text-red-600 hover:text-red-800"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
-                        <button
-                          onClick={() => {
-                            const newItinerary = [...data.itinerary];
-                            const newHighlights = [...(newItinerary[index].highlights || [])];
-                            newHighlights.push("");
-                            newItinerary[index] = {
-                              ...newItinerary[index],
-                              highlights: newHighlights,
-                            };
-                            setData({ ...data, itinerary: newItinerary });
-                          }}
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg"
-                        >
-                          <Plus className="w-4 h-4" />
-                          {t.admin.addHighlight}
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {t.itinerary.highlights} (繁體中文)
-                      </label>
-                      <div className="space-y-2">
-                        {((day as any).highlightsZh || []).map((highlight: string, highlightIndex: number) => (
-                          <div key={highlightIndex} className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={highlight}
-                              onChange={(e) => {
-                                const newItinerary = [...data.itinerary];
-                                const currentDay = newItinerary[index] as any;
-                                const newHighlightsZh = [...(currentDay.highlightsZh || [])];
-                                newHighlightsZh[highlightIndex] = e.target.value;
-                                newItinerary[index] = {
-                                  ...currentDay,
-                                  highlightsZh: newHighlightsZh,
-                                };
-                                setData({ ...data, itinerary: newItinerary });
-                              }}
-                              className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
-                            />
-                            <button
-                              onClick={() => {
-                                const newItinerary = [...data.itinerary];
-                                const currentDay = newItinerary[index] as any;
-                                const newHighlightsZh = [...(currentDay.highlightsZh || [])];
-                                newHighlightsZh.splice(highlightIndex, 1);
-                                newItinerary[index] = {
-                                  ...currentDay,
-                                  highlightsZh: newHighlightsZh,
-                                };
-                                setData({ ...data, itinerary: newItinerary });
-                              }}
-                              className="p-2 text-red-600 hover:text-red-800"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
+                      <div className="space-y-3">
+                        {(() => {
+                          // Merge highlights and highlightsZh into a single array
+                          const highlightsEn = day.highlights || [];
+                          const highlightsZh = (day as any).highlightsZh || [];
+                          const maxLength = Math.max(highlightsEn.length, highlightsZh.length);
+                          const mergedHighlights = Array.from({ length: maxLength }, (_, i) => {
+                            const en = typeof highlightsEn[i] === 'string' ? highlightsEn[i] : ((highlightsEn[i] as any)?.en || '');
+                            const zh = highlightsZh[i] || ((highlightsEn[i] as any)?.zh || '');
+                            return { en, zh };
+                          });
+
+                          return mergedHighlights.map((highlight, highlightIndex) => {
+                            const isDragging = draggedHighlightIndex?.dayIndex === index && draggedHighlightIndex?.highlightIndex === highlightIndex;
+                            
+                            return (
+                              <div
+                                key={highlightIndex}
+                                draggable
+                                onDragStart={(e) => {
+                                  setDraggedHighlightIndex({ dayIndex: index, highlightIndex });
+                                  e.dataTransfer.effectAllowed = 'move';
+                                  e.dataTransfer.setData('text/plain', highlightIndex.toString());
+                                }}
+                                onDragOver={(e) => {
+                                  e.preventDefault();
+                                  e.dataTransfer.dropEffect = 'move';
+                                }}
+                                onDrop={(e) => {
+                                  e.preventDefault();
+                                  const draggedItemIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                                  if (draggedItemIndex !== highlightIndex) {
+                                    const newItinerary = [...data.itinerary];
+                                    const currentDay = newItinerary[index] as any;
+                                    const highlightsEn = currentDay.highlights || [];
+                                    const highlightsZh = currentDay.highlightsZh || [];
+                                    const maxLength = Math.max(highlightsEn.length, highlightsZh.length);
+                                    const mergedHighlights = Array.from({ length: maxLength }, (_, i) => {
+                                      const en = typeof highlightsEn[i] === 'string' ? highlightsEn[i] : ((highlightsEn[i] as any)?.en || '');
+                                      const zh = highlightsZh[i] || ((highlightsEn[i] as any)?.zh || '');
+                                      return { en, zh };
+                                    });
+                                    
+                                    // Reorder
+                                    const [removed] = mergedHighlights.splice(draggedItemIndex, 1);
+                                    mergedHighlights.splice(highlightIndex, 0, removed);
+                                    
+                                    // Split back into separate arrays
+                                    const newHighlightsEn = mergedHighlights.map(h => h.en);
+                                    const newHighlightsZh = mergedHighlights.map(h => h.zh);
+                                    
+                                    newItinerary[index] = {
+                                      ...currentDay,
+                                      highlights: newHighlightsEn,
+                                      highlightsZh: newHighlightsZh,
+                                    };
+                                    setData({ ...data, itinerary: newItinerary });
+                                  }
+                                  setDraggedHighlightIndex(null);
+                                }}
+                                onDragEnd={() => {
+                                  setDraggedHighlightIndex(null);
+                                }}
+                                className={`flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50 cursor-move ${isDragging ? 'opacity-50' : ''}`}
+                              >
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
+                                  <span className="text-xs text-gray-500">{highlightIndex + 1}</span>
+                                </div>
+                                <div className="flex-1 space-y-2 sm:space-y-3 w-full">
+                                  <div>
+                                    <label className="block text-xs text-gray-600 mb-1">
+                                      {t.itinerary.highlights} (English)
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={highlight.en}
+                                      onChange={(e) => {
+                                        const newItinerary = [...data.itinerary];
+                                        const currentDay = newItinerary[index] as any;
+                                        const highlightsEn = currentDay.highlights || [];
+                                        const highlightsZh = currentDay.highlightsZh || [];
+                                        const maxLength = Math.max(highlightsEn.length, highlightsZh.length);
+                                        const mergedHighlights = Array.from({ length: maxLength }, (_, i) => {
+                                          const en = typeof highlightsEn[i] === 'string' ? highlightsEn[i] : ((highlightsEn[i] as any)?.en || '');
+                                          const zh = highlightsZh[i] || ((highlightsEn[i] as any)?.zh || '');
+                                          return { en, zh };
+                                        });
+                                        
+                                        mergedHighlights[highlightIndex].en = e.target.value;
+                                        
+                                        // Split back into separate arrays
+                                        const newHighlightsEn = mergedHighlights.map(h => h.en);
+                                        const newHighlightsZh = mergedHighlights.map(h => h.zh);
+                                        
+                                        newItinerary[index] = {
+                                          ...currentDay,
+                                          highlights: newHighlightsEn,
+                                          highlightsZh: newHighlightsZh,
+                                        };
+                                        setData({ ...data, itinerary: newItinerary });
+                                      }}
+                                      className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs text-gray-600 mb-1">
+                                      {t.itinerary.highlights} (繁體中文)
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={highlight.zh}
+                                      onChange={(e) => {
+                                        const newItinerary = [...data.itinerary];
+                                        const currentDay = newItinerary[index] as any;
+                                        const highlightsEn = currentDay.highlights || [];
+                                        const highlightsZh = currentDay.highlightsZh || [];
+                                        const maxLength = Math.max(highlightsEn.length, highlightsZh.length);
+                                        const mergedHighlights = Array.from({ length: maxLength }, (_, i) => {
+                                          const en = typeof highlightsEn[i] === 'string' ? highlightsEn[i] : ((highlightsEn[i] as any)?.en || '');
+                                          const zh = highlightsZh[i] || ((highlightsEn[i] as any)?.zh || '');
+                                          return { en, zh };
+                                        });
+                                        
+                                        mergedHighlights[highlightIndex].zh = e.target.value;
+                                        
+                                        // Split back into separate arrays
+                                        const newHighlightsEn = mergedHighlights.map(h => h.en);
+                                        const newHighlightsZh = mergedHighlights.map(h => h.zh);
+                                        
+                                        newItinerary[index] = {
+                                          ...currentDay,
+                                          highlights: newHighlightsEn,
+                                          highlightsZh: newHighlightsZh,
+                                        };
+                                        setData({ ...data, itinerary: newItinerary });
+                                      }}
+                                      className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
+                                    />
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    const newItinerary = [...data.itinerary];
+                                    const currentDay = newItinerary[index] as any;
+                                    const highlightsEn = currentDay.highlights || [];
+                                    const highlightsZh = currentDay.highlightsZh || [];
+                                    const maxLength = Math.max(highlightsEn.length, highlightsZh.length);
+                                    const mergedHighlights = Array.from({ length: maxLength }, (_, i) => {
+                                      const en = typeof highlightsEn[i] === 'string' ? highlightsEn[i] : ((highlightsEn[i] as any)?.en || '');
+                                      const zh = highlightsZh[i] || ((highlightsEn[i] as any)?.zh || '');
+                                      return { en, zh };
+                                    });
+                                    
+                                    mergedHighlights.splice(highlightIndex, 1);
+                                    
+                                    // Split back into separate arrays
+                                    const newHighlightsEn = mergedHighlights.map(h => h.en);
+                                    const newHighlightsZh = mergedHighlights.map(h => h.zh);
+                                    
+                                    newItinerary[index] = {
+                                      ...currentDay,
+                                      highlights: newHighlightsEn,
+                                      highlightsZh: newHighlightsZh,
+                                    };
+                                    setData({ ...data, itinerary: newItinerary });
+                                  }}
+                                  className="p-2 text-red-600 hover:text-red-800 flex-shrink-0"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            );
+                          });
+                        })()}
                         <button
                           onClick={() => {
                             const newItinerary = [...data.itinerary];
                             const currentDay = newItinerary[index] as any;
-                            const newHighlightsZh = [...(currentDay.highlightsZh || [])];
-                            newHighlightsZh.push("");
+                            const highlightsEn = currentDay.highlights || [];
+                            const highlightsZh = currentDay.highlightsZh || [];
+                            const newHighlightsEn = [...highlightsEn, ''];
+                            const newHighlightsZh = [...highlightsZh, ''];
+                            
                             newItinerary[index] = {
                               ...currentDay,
+                              highlights: newHighlightsEn,
                               highlightsZh: newHighlightsZh,
                             };
                             setData({ ...data, itinerary: newItinerary });

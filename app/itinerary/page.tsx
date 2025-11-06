@@ -12,6 +12,13 @@ export default function ItineraryPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxPhotos, setLightboxPhotos] = useState<string[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [activeDayIndex, setActiveDayIndex] = useState(0);
+  const dayRefs = useRef<(HTMLDivElement | null)[]>([]);
+  
+  // Initialize refs array
+  useEffect(() => {
+    dayRefs.current = new Array(itinerary.length);
+  }, [itinerary.length]);
 
   const openLightbox = (photos: string[], index: number) => {
     setLightboxPhotos(photos);
@@ -59,6 +66,118 @@ export default function ItineraryPage() {
     };
   }, [lightboxOpen]);
 
+  // Intersection Observer to track which day is currently in view
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    let activeIndex = 0;
+
+    const updateActiveDay = () => {
+      const headerHeight = 64; // Navigation header height
+      const stickyHeight = 56; // Sticky day indicator height
+      const topOffset = headerHeight + stickyHeight;
+
+      // Find the day card that has passed the threshold (top is above the sticky bar)
+      // We want the last day whose top has passed the threshold
+      let bestIndex = 0;
+      
+      for (let i = 0; i < dayRefs.current.length; i++) {
+        const ref = dayRefs.current[i];
+        if (!ref) continue;
+        
+        const rect = ref.getBoundingClientRect();
+        
+        // Check if this card's top has passed the threshold
+        // We want the last card that has passed
+        if (rect.top <= topOffset) {
+          bestIndex = i;
+        } else {
+          // Once we hit a card that hasn't passed, we've found our range
+          break;
+        }
+      }
+
+      // Update if different
+      if (bestIndex !== activeIndex) {
+        activeIndex = bestIndex;
+        setActiveDayIndex(bestIndex);
+      }
+    };
+
+    // Throttled scroll handler
+    let scrollTimeout: NodeJS.Timeout | null = null;
+    const handleScroll = () => {
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      scrollTimeout = setTimeout(() => {
+        updateActiveDay();
+      }, 50);
+    };
+
+    // Set up Intersection Observers for each day card
+    const setupObservers = () => {
+      // Clean up existing observers
+      observers.forEach((observer) => observer.disconnect());
+      observers.length = 0;
+
+      dayRefs.current.forEach((ref, index) => {
+        if (!ref) return;
+
+        const observer = new IntersectionObserver(
+          () => {
+            updateActiveDay();
+          },
+          {
+            threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+            rootMargin: '-80px 0px -50% 0px',
+          }
+        );
+
+        observer.observe(ref);
+        observers.push(observer);
+      });
+    };
+
+    // Wait a bit for refs to be set, then set up observers
+    const timeoutId = setTimeout(() => {
+      // Check if refs are actually set
+      const refsSet = dayRefs.current.some(ref => ref !== null);
+      if (refsSet) {
+        setupObservers();
+        updateActiveDay();
+      }
+    }, 200);
+
+    // Also set up observers on next frame in case timeout isn't enough
+    const rafId = requestAnimationFrame(() => {
+      const rafId2 = requestAnimationFrame(() => {
+        const refsSet = dayRefs.current.some(ref => ref !== null);
+        if (refsSet && observers.length === 0) {
+          setupObservers();
+          updateActiveDay();
+        }
+      });
+      return () => cancelAnimationFrame(rafId2);
+    });
+
+    // Listen to scroll events
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Initial check after a short delay
+    const initialTimeout = setTimeout(() => {
+      updateActiveDay();
+    }, 300);
+
+    return () => {
+      clearTimeout(timeoutId);
+      clearTimeout(initialTimeout);
+      if (rafId) cancelAnimationFrame(rafId);
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      observers.forEach((observer) => observer.disconnect());
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [itinerary]);
+
   const goToPrevious = () => {
     setLightboxIndex((prev) => (prev > 0 ? prev - 1 : lightboxPhotos.length - 1));
   };
@@ -85,20 +204,70 @@ export default function ItineraryPage() {
     return dayType === "ride";
   };
 
+      const activeDay = itinerary[activeDayIndex] || itinerary[0];
+      const activeDayTypeInfo = getDayTypeInfo(activeDay?.dayType || "ride");
+      const ActiveDayTypeIcon = activeDayTypeInfo.icon;
+
       return (
-        <div className="min-h-screen pt-16 bg-gray-50" suppressHydrationWarning>
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-            <div className="text-center mb-8 sm:mb-12">
-          <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
+        <div className="min-h-screen pt-16 pb-16 md:pb-0 bg-gray-50" suppressHydrationWarning>
+          {/* Sticky Day Indicator */}
+          <div className="sticky top-16 z-[9998] bg-white border-b border-gray-200 shadow-sm" suppressHydrationWarning>
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+              <div className="flex items-center gap-3 sm:gap-4" suppressHydrationWarning>
+                <div className="flex items-center gap-2 sm:gap-3" suppressHydrationWarning>
+                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                  <span className="text-xs sm:text-sm font-medium text-gray-700">
+                    {language === 'zh-TW' 
+                      ? `${t.itinerary.day}${activeDay?.day}${t.itinerary.daySuffix || '天'} • ${activeDay?.date}`
+                      : `${t.itinerary.day} ${activeDay?.day} • ${activeDay?.date}`}
+                    {(() => {
+                      if (!activeDay?.date) return '';
+                      try {
+                        const dateObj = new Date(activeDay.date);
+                        if (isNaN(dateObj.getTime())) return '';
+                        const dayOfWeek = dateObj.getDay();
+                        const dayNames = [
+                          t.itinerary.sunday,
+                          t.itinerary.monday,
+                          t.itinerary.tuesday,
+                          t.itinerary.wednesday,
+                          t.itinerary.thursday,
+                          t.itinerary.friday,
+                          t.itinerary.saturday,
+                        ];
+                        return ` • ${dayNames[dayOfWeek]}`;
+                      } catch {
+                        return '';
+                      }
+                    })()}
+                  </span>
+                </div>
+                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${activeDayTypeInfo.color} text-white`} suppressHydrationWarning>
+                  <ActiveDayTypeIcon className="w-3 h-3" />
+                  {activeDayTypeInfo.label}
+                </span>
+                <div className="flex-1" suppressHydrationWarning />
+                <h2 className="font-playfair text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate" suppressHydrationWarning>
+                  {language === 'zh-TW' 
+                    ? ((activeDay as any)?.titleZh || activeDay?.title)
+                    : (activeDay?.title || (activeDay as any)?.titleZh)}
+                </h2>
+              </div>
+            </div>
+          </div>
+          
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12" suppressHydrationWarning>
+            <div className="text-center mb-8 sm:mb-12" suppressHydrationWarning>
+          <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4" suppressHydrationWarning>
             {t.itinerary.title}
           </h1>
-          <p className="text-base sm:text-lg text-gray-600">
+          <p className="text-base sm:text-lg text-gray-600" suppressHydrationWarning>
             {t.itinerary.subtitle}
           </p>
         </div>
 
-            <div className="space-y-8 sm:space-y-12">
-              {itinerary.map((day) => {
+            <div className="space-y-8 sm:space-y-12" suppressHydrationWarning>
+              {itinerary.map((day, dayIndex) => {
                 const dayTypeInfo = getDayTypeInfo(day.dayType || "ride");
                 const DayTypeIcon = dayTypeInfo.icon;
                 const showRideStats = isRideDay(day.dayType || "ride");
@@ -128,7 +297,7 @@ export default function ItineraryPage() {
                   return (
                     <div className="flex flex-col items-end gap-2 sm:gap-3" suppressHydrationWarning>
                       {day.departureTime && (
-                        <div ref={departureRef} className="flex items-center gap-2 bg-white/10 px-3 sm:px-4 py-2 rounded-lg w-full sm:w-auto" suppressHydrationWarning>
+                        <div ref={departureRef} className="flex items-center gap-2 bg-white/10 px-3 sm:px-4 py-2 rounded-lg w-full sm:w-auto justify-center sm:justify-start" suppressHydrationWarning>
                           <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                           <span className="font-semibold text-sm sm:text-base">{t.itinerary.departure}: {day.departureTime}</span>
                         </div>
@@ -165,7 +334,10 @@ export default function ItineraryPage() {
                 return (
                   <div
                     key={day.day}
-                    className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+                    ref={(el) => {
+                      dayRefs.current[dayIndex] = el;
+                    }}
+                    className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden scroll-mt-20"
                     suppressHydrationWarning
                   >
                 {/* Day Header */}
@@ -514,11 +686,13 @@ export default function ItineraryPage() {
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
           onClick={closeLightbox}
+          suppressHydrationWarning
         >
           <button
             onClick={closeLightbox}
             className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors z-10 p-2"
             aria-label="Close lightbox"
+            suppressHydrationWarning
           >
             <X className="w-6 h-6 sm:w-8 sm:h-8" />
           </button>
@@ -532,6 +706,7 @@ export default function ItineraryPage() {
               }}
               className="absolute left-4 text-white hover:text-gray-300 transition-colors z-10 p-2 bg-black bg-opacity-50 rounded-full"
               aria-label="Previous image"
+              suppressHydrationWarning
             >
               <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
             </button>
@@ -546,6 +721,7 @@ export default function ItineraryPage() {
               }}
               className="absolute right-4 text-white hover:text-gray-300 transition-colors z-10 p-2 bg-black bg-opacity-50 rounded-full"
               aria-label="Next image"
+              suppressHydrationWarning
             >
               <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
             </button>
@@ -555,11 +731,13 @@ export default function ItineraryPage() {
           <div
             className="relative max-w-full max-h-full flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
+            suppressHydrationWarning
           >
             <img
               src={lightboxPhotos[lightboxIndex]}
               alt={`Photo ${lightboxIndex + 1} of ${lightboxPhotos.length}`}
               className="max-w-full max-h-[90vh] object-contain"
+              suppressHydrationWarning
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23ddd" width="400" height="300"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="20" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3EImage not found%3C/text%3E%3C/svg%3E';
@@ -569,7 +747,7 @@ export default function ItineraryPage() {
 
           {/* Image Counter */}
           {lightboxPhotos.length > 1 && (
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm sm:text-base bg-black bg-opacity-50 px-4 py-2 rounded-full">
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm sm:text-base bg-black bg-opacity-50 px-4 py-2 rounded-full" suppressHydrationWarning>
               {lightboxIndex + 1} / {lightboxPhotos.length}
             </div>
           )}

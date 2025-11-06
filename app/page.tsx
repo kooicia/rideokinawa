@@ -33,7 +33,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen pt-16">
+    <div className="min-h-screen pt-16 pb-16 md:pb-0">
       {/* Hero Section */}
       <section className="relative h-[500px] flex items-center justify-center bg-gradient-to-br from-blue-200 via-blue-50 to-green-200">
         <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-40"></div>
