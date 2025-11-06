@@ -49,10 +49,20 @@ export interface Translations {
     photos: string;
     flightInformation: string;
     flightNumber: string;
-    flightDetails: string;
-    departureTime: string;
-    arrivalTime: string;
-  };
+      flightDetails: string;
+      departureTime: string;
+      arrivalTime: string;
+      routeMap: string;
+      elevationProfile: string;
+      sunday: string;
+      monday: string;
+      tuesday: string;
+      wednesday: string;
+      thursday: string;
+      friday: string;
+      saturday: string;
+      daySuffix?: string;
+    };
   weather: {
     title: string;
     subtitle: string;
@@ -62,6 +72,9 @@ export interface Translations {
     windSpeed: string;
     note: string;
     noteText: string;
+    travelDatesMoreThan14Days: string;
+    checkBackCloser: string;
+    currentWeekForecast: string;
   };
   packing: {
     title: string;
@@ -81,6 +94,11 @@ export interface Translations {
     groupSize: string;
     supportVehicle: string;
     tipsForSuccess: string;
+    safety: string;
+    health: string;
+    bikeEquipment: string;
+    weather: string;
+    cultural: string;
   };
   admin: {
     title: string;
@@ -187,6 +205,15 @@ export const translations: Record<Language, Translations> = {
       flightDetails: 'Flight Details',
       departureTime: 'Departure Time',
       arrivalTime: 'Arrival Time',
+      routeMap: 'Route Map',
+      elevationProfile: 'Elevation Profile',
+      sunday: 'Sunday',
+      monday: 'Monday',
+      tuesday: 'Tuesday',
+      wednesday: 'Wednesday',
+      thursday: 'Thursday',
+      friday: 'Friday',
+      saturday: 'Saturday',
     },
     weather: {
       title: 'Weather Forecast',
@@ -197,6 +224,9 @@ export const translations: Record<Language, Translations> = {
       windSpeed: 'Wind Speed',
       note: 'Note:',
       noteText: 'Weather forecasts are updated daily from Open-Meteo. Conditions may change, so please check the forecast closer to your departure date.',
+      travelDatesMoreThan14Days: 'Your travel dates are more than 14 days away. Please check back closer to the travel dates for weather forecast.',
+      checkBackCloser: 'Please check back closer to the travel dates for weather forecast.',
+      currentWeekForecast: 'Below is the current weather forecast for this week:',
     },
     packing: {
       title: 'Packing Recommendations',
@@ -216,6 +246,11 @@ export const translations: Record<Language, Translations> = {
       groupSize: 'Group Size:',
       supportVehicle: 'Support Vehicle:',
       tipsForSuccess: 'Tips for Success',
+      safety: 'Safety',
+      health: 'Health',
+      bikeEquipment: 'Bike & Equipment',
+      weather: 'Weather',
+      cultural: 'Cultural',
     },
     admin: {
       title: 'Admin Panel',
@@ -298,6 +333,7 @@ export const translations: Record<Language, Translations> = {
       title: '每日行程',
       subtitle: '詳細的每日行程安排',
       day: '第',
+      daySuffix: '天',
       arrivalDay: '抵達日',
       departureDay: '出發日',
       freeAndEasy: '自由活動',
@@ -320,6 +356,15 @@ export const translations: Record<Language, Translations> = {
       flightDetails: '航班詳情',
       departureTime: '出發時間',
       arrivalTime: '抵達時間',
+      routeMap: '路線地圖',
+      elevationProfile: '海拔剖面圖',
+      sunday: '星期日',
+      monday: '星期一',
+      tuesday: '星期二',
+      wednesday: '星期三',
+      thursday: '星期四',
+      friday: '星期五',
+      saturday: '星期六',
     },
     weather: {
       title: '天氣預報',
@@ -330,6 +375,9 @@ export const translations: Record<Language, Translations> = {
       windSpeed: '風速',
       note: '注意：',
       noteText: '天氣預報每日從 Open-Meteo 更新。天氣狀況可能變化，請在出發日期前再次確認預報。',
+      travelDatesMoreThan14Days: '您的旅行日期距離現在超過14天。請在接近旅行日期時再次查看天氣預報。',
+      checkBackCloser: '請在接近旅行日期時再次查看天氣預報。',
+      currentWeekForecast: '以下是本週的目前天氣預報：',
     },
     packing: {
       title: '打包建議',
@@ -349,6 +397,11 @@ export const translations: Record<Language, Translations> = {
       groupSize: '團體人數：',
       supportVehicle: '支援車輛：',
       tipsForSuccess: '成功小貼士',
+      safety: '安全',
+      health: '健康',
+      bikeEquipment: '單車與裝備',
+      weather: '天氣',
+      cultural: '文化',
     },
     admin: {
       title: '管理面板',

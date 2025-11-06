@@ -6,7 +6,18 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function PackingPage() {
   const { packingList } = tourData;
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  // Helper function to get the correct language version of an item
+  const getItemText = (item: any): string => {
+    if (typeof item === 'string') {
+      return item; // Legacy format - use string as-is
+    }
+    if (language === 'zh-TW') {
+      return item.zh || item.en || '';
+    }
+    return item.en || item.zh || '';
+  };
 
   const categories = [
     {
@@ -65,25 +76,13 @@ export default function PackingPage() {
                       className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors"
                     >
                       <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm sm:text-base text-gray-700">{item}</span>
+                      <span className="text-sm sm:text-base text-gray-700">{getItemText(item)}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             );
           })}
-        </div>
-
-        <div className="mt-8 sm:mt-12 bg-amber-50 border border-amber-200 rounded-lg p-4 sm:p-6">
-          <h3 className="font-semibold text-sm sm:text-base text-amber-900 mb-2 sm:mb-3">{t.packing.tips}</h3>
-          <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-amber-800">
-            <li>• Pack lightweight, moisture-wicking clothing for cycling</li>
-            <li>• Use packing cubes to organize your gear</li>
-            <li>• Bring a waterproof bag or cover for electronics</li>
-            <li>• Leave room for souvenirs and local purchases</li>
-            <li>• Label your luggage with contact information</li>
-            <li>• Consider the weather forecast when packing layers</li>
-          </ul>
         </div>
       </div>
     </div>

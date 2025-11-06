@@ -134,6 +134,28 @@ export default function AdminPage() {
   };
 
   // Compress image before storing to reduce localStorage size
+  // Helper function to format file size
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  // Helper function to calculate base64 image size
+  const getBase64ImageSize = (base64String: string): number => {
+    if (!base64String || !base64String.startsWith('data:')) return 0;
+    // Remove data URL prefix (e.g., "data:image/jpeg;base64,")
+    const base64Data = base64String.split(',')[1] || '';
+    // Base64 encoding increases size by ~33%, so we need to account for padding
+    // Each character represents 6 bits, so 4 chars = 3 bytes
+    // But we also need to account for padding characters
+    const padding = base64Data.endsWith('==') ? 2 : base64Data.endsWith('=') ? 1 : 0;
+    const size = (base64Data.length * 3) / 4 - padding;
+    return size;
+  };
+
   const compressImage = (file: File, maxWidth: number = 1200, maxHeight: number = 1200, quality: number = 0.7): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -242,7 +264,7 @@ export default function AdminPage() {
           localStorage.setItem("tourData", dataString);
         } catch (e: any) {
           if (e.name === 'QuotaExceededError') {
-            alert('Storage quota exceeded. Data will be saved to server only. Please remove some images or use smaller image files.');
+            alert('Local storage quota exceeded (total data size too large). Data will be saved to server only. Consider removing some photos or using smaller/compressed images. The total size of all photos combined exceeds browser storage limits.');
           } else {
             throw e;
           }
@@ -1179,10 +1201,11 @@ export default function AdminPage() {
                             const files = Array.from(e.target.files || []);
                             if (files.length === 0) return;
 
-                            // Check file sizes
+                            // Check file sizes and show sizes
                             const oversizedFiles = files.filter(f => f.size > 5 * 1024 * 1024);
                             if (oversizedFiles.length > 0) {
-                              alert(`${oversizedFiles.length} image(s) exceed 5MB limit. Please compress them first.`);
+                              const sizes = oversizedFiles.map(f => formatFileSize(f.size)).join(', ');
+                              alert(`${oversizedFiles.length} image(s) exceed 5MB limit (sizes: ${sizes}). Please compress them first.`);
                               return;
                             }
 
@@ -1242,6 +1265,11 @@ export default function AdminPage() {
                                       target.style.display = 'none';
                                     }}
                                   />
+                                  <div className="mt-1 text-xs text-gray-500 text-center">
+                                    {photo.startsWith('data:') 
+                                      ? formatFileSize(getBase64ImageSize(photo))
+                                      : 'URL'}
+                                  </div>
                                 </div>
                               )}
                               <div className="flex-1 space-y-2">
@@ -1258,7 +1286,7 @@ export default function AdminPage() {
                                       if (file) {
                                         // Check file size (max 5MB)
                                         if (file.size > 5 * 1024 * 1024) {
-                                          alert("Image size must be less than 5MB");
+                                          alert(`Image size (${formatFileSize(file.size)}) exceeds 5MB limit. Please compress it first.`);
                                           return;
                                         }
                                         try {
@@ -1513,10 +1541,11 @@ export default function AdminPage() {
                                   const files = Array.from(e.target.files || []);
                                   if (files.length === 0) return;
 
-                                  // Check file sizes
+                                  // Check file sizes and show sizes
                                   const oversizedFiles = files.filter(f => f.size > 5 * 1024 * 1024);
                                   if (oversizedFiles.length > 0) {
-                                    alert(`${oversizedFiles.length} image(s) exceed 5MB limit. Please compress them first.`);
+                                    const sizes = oversizedFiles.map(f => formatFileSize(f.size)).join(', ');
+                                    alert(`${oversizedFiles.length} image(s) exceed 5MB limit (sizes: ${sizes}). Please compress them first.`);
                                     return;
                                   }
 
@@ -1584,6 +1613,11 @@ export default function AdminPage() {
                                             target.style.display = 'none';
                                           }}
                                         />
+                                        <div className="mt-1 text-xs text-gray-500 text-center">
+                                          {photo.startsWith('data:') 
+                                            ? formatFileSize(getBase64ImageSize(photo))
+                                            : 'URL'}
+                                        </div>
                                       </div>
                                     )}
                                     <div className="flex-1 space-y-2">
@@ -1600,7 +1634,7 @@ export default function AdminPage() {
                                             if (file) {
                                               // Check file size (max 5MB)
                                               if (file.size > 5 * 1024 * 1024) {
-                                                alert("Image size must be less than 5MB");
+                                                alert(`Image size (${formatFileSize(file.size)}) exceeds 5MB limit. Please compress it first.`);
                                                 return;
                                               }
                                               try {
@@ -1786,35 +1820,75 @@ export default function AdminPage() {
                 <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-3 sm:mb-4">
                   {category.category}
                 </h3>
-                <div className="space-y-2">
-                  {category.items.map((item, itemIndex) => (
-                    <div key={itemIndex} className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={item}
-                        onChange={(e) => {
-                          const newNotes = [...data.importantNotes];
-                          newNotes[catIndex].items[itemIndex] = e.target.value;
-                          setData({ ...data, importantNotes: newNotes });
-                        }}
-                        className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
-                      />
-                      <button
-                        onClick={() => {
-                          const newNotes = [...data.importantNotes];
-                          newNotes[catIndex].items.splice(itemIndex, 1);
-                          setData({ ...data, importantNotes: newNotes });
-                        }}
-                        className="p-2 text-red-600 hover:text-red-800"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
+                <div className="space-y-4">
+                  {category.items.map((item, itemIndex) => {
+                    // Support both string (legacy) and object format
+                    const itemEn = typeof item === 'string' ? item : (item.en || '');
+                    const itemZh = typeof item === 'string' ? '' : (item.zh || '');
+                    
+                    return (
+                      <div key={itemIndex} className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50">
+                        <div className="flex-1 space-y-2 sm:space-y-3 w-full">
+                          <div>
+                            <label className="block text-xs text-gray-600 mb-1">
+                              {t.admin.notesLabel} (English)
+                            </label>
+                            <input
+                              type="text"
+                              value={itemEn}
+                              onChange={(e) => {
+                                const newNotes = [...data.importantNotes];
+                                const currentItem = newNotes[catIndex].items[itemIndex];
+                                if (typeof currentItem === 'string') {
+                                  // Convert string to object
+                                  newNotes[catIndex].items[itemIndex] = { en: e.target.value, zh: '' };
+                                } else {
+                                  newNotes[catIndex].items[itemIndex] = { ...currentItem, en: e.target.value };
+                                }
+                                setData({ ...data, importantNotes: newNotes });
+                              }}
+                              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-600 mb-1">
+                              {t.admin.notesLabel} (繁體中文)
+                            </label>
+                            <input
+                              type="text"
+                              value={itemZh}
+                              onChange={(e) => {
+                                const newNotes = [...data.importantNotes];
+                                const currentItem = newNotes[catIndex].items[itemIndex];
+                                if (typeof currentItem === 'string') {
+                                  // Convert string to object
+                                  newNotes[catIndex].items[itemIndex] = { en: currentItem, zh: e.target.value };
+                                } else {
+                                  newNotes[catIndex].items[itemIndex] = { ...currentItem, zh: e.target.value };
+                                }
+                                setData({ ...data, importantNotes: newNotes });
+                              }}
+                              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
+                            />
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            const newNotes = [...data.importantNotes];
+                            newNotes[catIndex].items.splice(itemIndex, 1);
+                            setData({ ...data, importantNotes: newNotes });
+                          }}
+                          className="p-2 text-red-600 hover:text-red-800 flex-shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    );
+                  })}
                   <button
                     onClick={() => {
                       const newNotes = [...data.importantNotes];
-                      newNotes[catIndex].items.push("");
+                      newNotes[catIndex].items.push({ en: '', zh: '' });
                       setData({ ...data, importantNotes: newNotes });
                     }}
                     className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg"
@@ -1839,35 +1913,75 @@ export default function AdminPage() {
                 <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-3 sm:mb-4 capitalize">
                   {category}
                 </h3>
-                <div className="space-y-2">
-                  {(items as string[]).map((item, itemIndex) => (
-                    <div key={itemIndex} className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={item}
-                        onChange={(e) => {
-                          const newPackingList = { ...data.packingList };
-                          (newPackingList as any)[category][itemIndex] = e.target.value;
-                          setData({ ...data, packingList: newPackingList });
-                        }}
-                        className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
-                      />
-                      <button
-                        onClick={() => {
-                          const newPackingList = { ...data.packingList };
-                          (newPackingList as any)[category].splice(itemIndex, 1);
-                          setData({ ...data, packingList: newPackingList });
-                        }}
-                        className="p-2 text-red-600 hover:text-red-800"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
+                <div className="space-y-4">
+                  {(items as any[]).map((item, itemIndex) => {
+                    // Support both string (legacy) and object format
+                    const itemEn = typeof item === 'string' ? item : (item.en || '');
+                    const itemZh = typeof item === 'string' ? '' : (item.zh || '');
+                    
+                    return (
+                      <div key={itemIndex} className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50">
+                        <div className="flex-1 space-y-2 sm:space-y-3 w-full">
+                          <div>
+                            <label className="block text-xs text-gray-600 mb-1">
+                              Item (English)
+                            </label>
+                            <input
+                              type="text"
+                              value={itemEn}
+                              onChange={(e) => {
+                                const newPackingList = { ...data.packingList };
+                                const currentItem = (newPackingList as any)[category][itemIndex];
+                                if (typeof currentItem === 'string') {
+                                  // Convert string to object
+                                  (newPackingList as any)[category][itemIndex] = { en: e.target.value, zh: '' };
+                                } else {
+                                  (newPackingList as any)[category][itemIndex] = { ...currentItem, en: e.target.value };
+                                }
+                                setData({ ...data, packingList: newPackingList });
+                              }}
+                              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-600 mb-1">
+                              Item (繁體中文)
+                            </label>
+                            <input
+                              type="text"
+                              value={itemZh}
+                              onChange={(e) => {
+                                const newPackingList = { ...data.packingList };
+                                const currentItem = (newPackingList as any)[category][itemIndex];
+                                if (typeof currentItem === 'string') {
+                                  // Convert string to object
+                                  (newPackingList as any)[category][itemIndex] = { en: currentItem, zh: e.target.value };
+                                } else {
+                                  (newPackingList as any)[category][itemIndex] = { ...currentItem, zh: e.target.value };
+                                }
+                                setData({ ...data, packingList: newPackingList });
+                              }}
+                              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
+                            />
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            const newPackingList = { ...data.packingList };
+                            (newPackingList as any)[category].splice(itemIndex, 1);
+                            setData({ ...data, packingList: newPackingList });
+                          }}
+                          className="p-2 text-red-600 hover:text-red-800 flex-shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    );
+                  })}
                   <button
                     onClick={() => {
                       const newPackingList = { ...data.packingList };
-                      (newPackingList as any)[category].push("");
+                      (newPackingList as any)[category].push({ en: '', zh: '' });
                       setData({ ...data, packingList: newPackingList });
                     }}
                     className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg"

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { TrendingUp, Route as RouteIcon } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface RouteMapProps {
   route: string;
@@ -22,6 +23,7 @@ interface RoutePoint {
 }
 
 export default function RouteMap({ route, distance, elevationGain, dayType, coordinates: providedCoordinates, gpxUrl, showMap = true, showElevationProfileOnly = false }: RouteMapProps) {
+  const { t } = useLanguage();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -800,15 +802,15 @@ export default function RouteMap({ route, distance, elevationGain, dayType, coor
     }
 
     return (
-      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+      <div className="px-3 sm:px-4 py-2 sm:py-3 bg-gray-100 rounded-lg">
         {!showElevationProfileOnly && (
-          <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="w-4 h-4 text-gray-600" />
-            <span className="text-xs font-medium text-gray-700">Elevation Profile</span>
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" />
+            <span className="text-xs font-medium text-gray-700">{t.itinerary.elevationProfile}</span>
           </div>
         )}
-        <ResponsiveContainer width="100%" height={120}>
-          <LineChart data={chartData} margin={{ top: 5, right: 5, left: 20, bottom: 20 }}>
+        <ResponsiveContainer width="100%" height={100}>
+          <LineChart data={chartData} margin={{ top: 2, right: 10, left: 20, bottom: 15 }}>
             <Line
               type="monotone"
               dataKey="elevation"
@@ -826,7 +828,7 @@ export default function RouteMap({ route, distance, elevationGain, dayType, coor
               tickFormatter={(value) => `${value}km`}
               allowDecimals={false}
               allowDataOverflow={false}
-              label={{ value: 'Distance', position: 'insideBottom', offset: -5, style: { fontSize: '10px', fill: '#6b7280' } }}
+              label={{ value: t.itinerary.distance, position: 'insideBottom', offset: -5, style: { fontSize: '10px', fill: '#6b7280' } }}
             />
             <YAxis
               domain={[yAxisMin, yAxisMax]}
@@ -836,7 +838,7 @@ export default function RouteMap({ route, distance, elevationGain, dayType, coor
               tickFormatter={(value) => `${value}m`}
               allowDecimals={false}
               width={50}
-              label={{ value: 'Elevation', angle: -90, position: 'left', offset: -5, style: { fontSize: '10px', fill: '#6b7280', textAnchor: 'middle' } }}
+              label={{ value: t.itinerary.elevationGain, angle: -90, position: 'left', offset: -5, style: { fontSize: '10px', fill: '#6b7280', textAnchor: 'middle' } }}
             />
             <Tooltip
               contentStyle={{
@@ -846,8 +848,8 @@ export default function RouteMap({ route, distance, elevationGain, dayType, coor
                 fontSize: '12px',
                 padding: '4px 8px',
               }}
-              formatter={(value: any) => [`${value}m`, 'Elevation']}
-              labelFormatter={(label: any) => `Distance: ${label}km`}
+              formatter={(value: any) => [`${value}m`, t.itinerary.elevationGain]}
+              labelFormatter={(label: any) => `${t.itinerary.distance}: ${label}km`}
             />
           </LineChart>
         </ResponsiveContainer>
@@ -874,11 +876,11 @@ export default function RouteMap({ route, distance, elevationGain, dayType, coor
   }
 
   return (
-    <div className="mb-4 sm:mb-6" suppressHydrationWarning>
-      <div className="flex items-center gap-2 mb-3" suppressHydrationWarning>
-        <RouteIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
-        <h3 className="font-semibold text-sm sm:text-base text-gray-900">Route Map</h3>
-      </div>
+            <div className="mb-4 sm:mb-6" suppressHydrationWarning>
+              <div className="flex items-center gap-2 mb-3" suppressHydrationWarning>
+                <RouteIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                <h3 className="font-semibold text-sm sm:text-base text-gray-900">{t.itinerary.routeMap}</h3>
+              </div>
       
       <div className="rounded-lg overflow-hidden border border-gray-200 relative" suppressHydrationWarning>
         {loading && (

@@ -229,10 +229,10 @@ export default function WeatherPage() {
         {showingCurrentWeek && !loading && !error && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 sm:p-6 mb-6">
             <p className="text-sm sm:text-base text-amber-800 mb-2 text-center">
-              <strong>Note:</strong> Your travel dates are more than 14 days away. Please check back closer to the travel dates for weather forecast.
+              <strong>{t.weather.note}</strong> {t.weather.travelDatesMoreThan14Days}
             </p>
             <p className="text-sm sm:text-base text-amber-700 text-center font-medium">
-              Below is the current weather forecast for this week:
+              {t.weather.currentWeekForecast}
             </p>
           </div>
         )}

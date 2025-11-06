@@ -175,7 +175,29 @@ export default function ItineraryPage() {
                       <div className="flex items-center gap-2 sm:gap-3 mb-2 flex-wrap" suppressHydrationWarning>
                         <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span className="text-xs sm:text-sm opacity-90">
-                          {t.itinerary.day} {day.day} • {day.date}
+                          {language === 'zh-TW' 
+                            ? `${t.itinerary.day}${day.day}${t.itinerary.daySuffix || '天'} • ${day.date}`
+                            : `${t.itinerary.day} ${day.day} • ${day.date}`}
+                          {(() => {
+                            if (!day.date) return '';
+                            try {
+                              const dateObj = new Date(day.date);
+                              if (isNaN(dateObj.getTime())) return '';
+                              const dayOfWeek = dateObj.getDay();
+                              const dayNames = [
+                                t.itinerary.sunday,
+                                t.itinerary.monday,
+                                t.itinerary.tuesday,
+                                t.itinerary.wednesday,
+                                t.itinerary.thursday,
+                                t.itinerary.friday,
+                                t.itinerary.saturday,
+                              ];
+                              return ` • ${dayNames[dayOfWeek]}`;
+                            } catch {
+                              return '';
+                            }
+                          })()}
                         </span>
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${dayTypeInfo.color} text-white`}>
                           <DayTypeIcon className="w-3 h-3" />
@@ -374,7 +396,7 @@ export default function ItineraryPage() {
                           <Utensils className="w-4 h-4 text-gray-500" />
                           {t.itinerary.meals}
                         </h3>
-                        <div className="p-4 sm:p-5 bg-gray-50 rounded-xl" suppressHydrationWarning>
+                        <div className="p-4 sm:p-5 bg-gray-100 rounded-xl" suppressHydrationWarning>
                           <div className="space-y-3 sm:space-y-4" suppressHydrationWarning>
                             {day.meals.breakfast && (
                               <div suppressHydrationWarning>
@@ -406,7 +428,7 @@ export default function ItineraryPage() {
                           <Hotel className="w-4 h-4 text-gray-500" />
                           {t.itinerary.accommodation}
                         </h3>
-                        <div className="p-4 sm:p-5 bg-gray-50 rounded-xl" suppressHydrationWarning>
+                        <div className="p-4 sm:p-5 bg-gray-100 rounded-xl" suppressHydrationWarning>
                           <div className="space-y-3 sm:space-y-4" suppressHydrationWarning>
                             <div suppressHydrationWarning>
                               {day.hotel.url ? (
