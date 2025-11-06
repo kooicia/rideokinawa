@@ -149,6 +149,13 @@ export interface Translations {
     removeHotel: string;
     hotelWebsiteUrl: string;
     noHotelInfo: string;
+    addMealOption: string;
+    removeMealOption: string;
+    mealOptionEnglish: string;
+    mealOptionChinese: string;
+    mealOptionMapsLink: string;
+    mealOption: string;
+    noMealOptions: string;
   };
 }
 
@@ -301,6 +308,13 @@ export const translations: Record<Language, Translations> = {
       removeHotel: 'Remove Hotel',
       hotelWebsiteUrl: 'Hotel Website URL',
       noHotelInfo: 'No hotel information. Click "Add Hotel" to add accommodation details.',
+      addMealOption: 'Add Option',
+      removeMealOption: 'Remove Option',
+      mealOptionEnglish: 'English',
+      mealOptionChinese: 'Chinese',
+      mealOptionMapsLink: 'Google Maps Link',
+      mealOption: 'Option',
+      noMealOptions: 'No options added. Click "Add Option" to add meal options.',
     },
   },
   'zh-TW': {
@@ -452,6 +466,13 @@ export const translations: Record<Language, Translations> = {
       removeHotel: '移除飯店',
       hotelWebsiteUrl: '飯店網站網址',
       noHotelInfo: '尚無飯店資訊。點擊「新增飯店」以新增住宿詳情。',
+      addMealOption: '新增選項',
+      removeMealOption: '移除選項',
+      mealOptionEnglish: '英文',
+      mealOptionChinese: '中文',
+      mealOptionMapsLink: 'Google 地圖連結',
+      mealOption: '選項',
+      noMealOptions: '尚未新增選項。點擊「新增選項」以新增餐點選項。',
     },
   },
 };

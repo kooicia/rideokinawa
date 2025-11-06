@@ -1,14 +1,34 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Clock, MapPin, Utensils, Hotel, Calendar, Route, TrendingUp, Plane, Bike, Map, Home, PlaneTakeoff, PlaneLanding, X, ChevronLeft, ChevronRight } from "lucide-react";
-import tourData from "@/data/tour-data.json";
+import { Clock, MapPin, Utensils, Hotel, Calendar, Route, TrendingUp, Plane, Bike, Map, Home, PlaneTakeoff, PlaneLanding, X, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import tourDataStatic from "@/data/tour-data.json";
 import { useLanguage } from "@/contexts/LanguageContext";
 import RouteMap from "@/components/RouteMap";
 
 export default function ItineraryPage() {
-  const { itinerary } = tourData;
   const { t, language } = useLanguage();
+  const [tourData, setTourData] = useState(tourDataStatic);
+  
+  // Load data from API (always get latest) on mount
+  useEffect(() => {
+    fetch("/api/tour-data")
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) {
+          setTourData(data);
+          console.log('Loaded latest data from server');
+        } else {
+          console.warn('Server data error, using static data');
+        }
+      })
+      .catch(err => {
+        console.error('Error loading from server, using static data:', err);
+        // Keep using static data as fallback
+      });
+  }, []);
+  
+  const { itinerary } = tourData;
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxPhotos, setLightboxPhotos] = useState<string[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -542,11 +562,26 @@ export default function ItineraryPage() {
                             onError={(e) => {
                               // Fallback if image fails to load
                               const target = e.target as HTMLImageElement;
+                              
+                              // Only log error for base64 images (corruption) or if it's a URL that should exist
+                              if (photo && photo.startsWith('data:image/')) {
+                                console.error('Base64 image failed to load in itinerary (possible corruption):', photo.substring(0, 50) + '...');
+                              } else if (photo && photo.startsWith('/')) {
+                                // File path that doesn't exist - this is expected if file wasn't uploaded
+                                console.warn('Image file not found:', photo);
+                              } else if (photo && photo.startsWith('http')) {
+                                // External URL that failed to load
+                                console.error('External image failed to load:', photo);
+                              }
+                              
                               const parent = target.parentElement;
                               if (parent) {
                                 parent.innerHTML = `
-                                  <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs px-1 text-center">
-                                    Photo ${index + 1}
+                                  <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs px-1 text-center border-2 border-gray-200 bg-gray-50 rounded">
+                                    <div>
+                                      <div class="text-gray-600 font-medium mb-1">Image Not Available</div>
+                                      <div class="text-gray-500">Photo ${index + 1}</div>
+                                    </div>
                                   </div>
                                 `;
                               }
@@ -570,24 +605,71 @@ export default function ItineraryPage() {
                         </h3>
                         <div className="p-4 sm:p-5 bg-gray-100 rounded-xl" suppressHydrationWarning>
                           <div className="space-y-3 sm:space-y-4" suppressHydrationWarning>
-                            {day.meals.breakfast && (
-                              <div suppressHydrationWarning>
-                                <div className="text-xs text-gray-500 mb-1.5 uppercase tracking-wide" suppressHydrationWarning>{t.itinerary.breakfast}</div>
-                                <div className="text-sm sm:text-base text-gray-900 font-medium" suppressHydrationWarning>{day.meals.breakfast}</div>
-                              </div>
-                            )}
-                            {day.meals.lunch && (
-                              <div suppressHydrationWarning>
-                                <div className="text-xs text-gray-500 mb-1.5 uppercase tracking-wide" suppressHydrationWarning>{t.itinerary.lunch}</div>
-                                <div className="text-sm sm:text-base text-gray-900 font-medium" suppressHydrationWarning>{day.meals.lunch}</div>
-                              </div>
-                            )}
-                            {day.meals.dinner && (
-                              <div suppressHydrationWarning>
-                                <div className="text-xs text-gray-500 mb-1.5 uppercase tracking-wide" suppressHydrationWarning>{t.itinerary.dinner}</div>
-                                <div className="text-sm sm:text-base text-gray-900 font-medium" suppressHydrationWarning>{day.meals.dinner}</div>
-                              </div>
-                            )}
+                            {(() => {
+                              const renderMealOptions = (mealType: 'breakfast' | 'lunch' | 'dinner', mealLabel: string) => {
+                                const meal = day.meals?.[mealType];
+                                if (!meal) return null;
+                                
+                                // Support both old format (string) and new format (array of objects)
+                                let options: Array<{ en: string; zh: string; mapsLink: string } | string> = [];
+                                if (typeof meal === 'string') {
+                                  // Old format: single string
+                                  options = [meal];
+                                } else if (Array.isArray(meal)) {
+                                  // New format: array of objects or strings
+                                  options = meal;
+                                } else {
+                                  return null;
+                                }
+                                
+                                if (options.length === 0) return null;
+                                
+                                return (
+                                  <div suppressHydrationWarning>
+                                    <div className="text-xs text-gray-500 mb-1.5 uppercase tracking-wide" suppressHydrationWarning>{mealLabel}</div>
+                                    <div className="space-y-2" suppressHydrationWarning>
+                                      {options.map((option, idx) => {
+                                        // Handle both string (old format) and object (new format)
+                                        const isString = typeof option === 'string';
+                                        const text = isString 
+                                          ? option 
+                                          : (language === 'zh-TW' && option.zh ? option.zh : option.en);
+                                        const mapsLink = !isString && option.mapsLink ? option.mapsLink : null;
+                                        
+                                        return (
+                                          <div key={idx} className="flex items-start gap-2" suppressHydrationWarning>
+                                            <div className="flex-1">
+                                              {mapsLink ? (
+                                                <a
+                                                  href={mapsLink}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="text-sm sm:text-base text-gray-900 font-medium hover:text-blue-600 transition-colors flex items-center gap-1"
+                                                  suppressHydrationWarning
+                                                >
+                                                  {text}
+                                                  <ExternalLink className="w-3 h-3" />
+                                                </a>
+                                              ) : (
+                                                <div className="text-sm sm:text-base text-gray-900 font-medium" suppressHydrationWarning>{text}</div>
+                                              )}
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                );
+                              };
+                              
+                              return (
+                                <>
+                                  {renderMealOptions('breakfast', t.itinerary.breakfast)}
+                                  {renderMealOptions('lunch', t.itinerary.lunch)}
+                                  {renderMealOptions('dinner', t.itinerary.dinner)}
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
                       </div>
@@ -640,12 +722,26 @@ export default function ItineraryPage() {
                                         onError={(e) => {
                                           // Fallback if image fails to load
                                           const target = e.target as HTMLImageElement;
-                                          target.style.display = 'none';
+                                          
+                                          // Only log error for base64 images (corruption) or if it's a URL that should exist
+                                          if (photo && photo.startsWith('data:image/')) {
+                                            console.error('Base64 hotel image failed to load (possible corruption):', photo.substring(0, 50) + '...');
+                                          } else if (photo && photo.startsWith('/')) {
+                                            // File path that doesn't exist - this is expected if file wasn't uploaded
+                                            console.warn('Hotel image file not found:', photo);
+                                          } else if (photo && photo.startsWith('http')) {
+                                            // External URL that failed to load
+                                            console.error('External hotel image failed to load:', photo);
+                                          }
+                                          
                                           const parent = target.parentElement;
                                           if (parent) {
                                             parent.innerHTML = `
-                                              <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs px-1 text-center">
-                                                Photo ${photoIndex + 1}
+                                              <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs px-1 text-center border-2 border-gray-200 bg-gray-50 rounded">
+                                                <div>
+                                                  <div class="text-gray-600 font-medium mb-1">Image Not Available</div>
+                                                  <div class="text-gray-500">Photo ${photoIndex + 1}</div>
+                                                </div>
                                               </div>
                                             `;
                                           }
@@ -740,6 +836,17 @@ export default function ItineraryPage() {
               suppressHydrationWarning
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
+                const failedPhoto = lightboxPhotos[lightboxIndex];
+                
+                // Only log error for base64 images (corruption) or external URLs
+                if (failedPhoto && failedPhoto.startsWith('data:image/')) {
+                  console.error('Lightbox base64 image failed to load (possible corruption):', failedPhoto.substring(0, 50) + '...');
+                } else if (failedPhoto && failedPhoto.startsWith('/')) {
+                  console.warn('Lightbox image file not found:', failedPhoto);
+                } else if (failedPhoto && failedPhoto.startsWith('http')) {
+                  console.error('Lightbox external image failed to load:', failedPhoto);
+                }
+                
                 target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23ddd" width="400" height="300"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="20" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3EImage not found%3C/text%3E%3C/svg%3E';
               }}
             />

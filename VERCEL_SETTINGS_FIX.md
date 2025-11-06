@@ -55,3 +55,6 @@ After updating settings, check the build logs:
    - Make sure you're visiting the correct URL from the deployment
    - It should be something like: `https://rideokinawa-xxxxx.vercel.app` or `https://rideokinawa.vercel.app`
 
+
+
+

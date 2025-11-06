@@ -18,6 +18,72 @@ export default function AdminPage() {
   const [saved, setSaved] = useState(false);
   const [draggedHighlightIndex, setDraggedHighlightIndex] = useState<{ dayIndex: number; highlightIndex: number } | null>(null);
 
+  // Helper function to validate base64 image data
+  const isValidBase64Image = (str: string): boolean => {
+    if (!str || typeof str !== 'string') return false;
+    if (!str.startsWith('data:image/')) return false;
+    
+    // Check if base64 data is present
+    const base64Part = str.split(',')[1];
+    if (!base64Part) return false;
+    
+    // Check if base64 string is not truncated (should end with valid base64 characters)
+    // Base64 strings should be a multiple of 4 in length (after padding)
+    const base64Length = base64Part.length;
+    if (base64Length < 100) return false; // Too short to be a valid image
+    
+    // Try to validate base64 format
+    try {
+      // Check if it's valid base64 characters
+      const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+      if (!base64Regex.test(base64Part)) return false;
+      
+      // Try to decode a small portion to check if it's valid
+      atob(base64Part.substring(0, Math.min(100, base64Length)));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // Helper function to validate all images in data
+  const validateImageData = (dataToValidate: any): boolean => {
+    try {
+      // Check itinerary photos
+      if (dataToValidate.itinerary && Array.isArray(dataToValidate.itinerary)) {
+        for (const day of dataToValidate.itinerary) {
+          // Check daily photos
+          if (day.photos && Array.isArray(day.photos)) {
+            for (const photo of day.photos) {
+              if (photo && typeof photo === 'string' && photo.startsWith('data:image/')) {
+                if (!isValidBase64Image(photo)) {
+                  console.warn('Invalid base64 image detected in daily photos');
+                  return false;
+                }
+              }
+            }
+          }
+          
+          // Check hotel photos
+          if (day.hotel && day.hotel.photos && Array.isArray(day.hotel.photos)) {
+            for (const photo of day.hotel.photos) {
+              if (photo && typeof photo === 'string' && photo.startsWith('data:image/')) {
+                if (!isValidBase64Image(photo)) {
+                  console.warn('Invalid base64 image detected in hotel photos');
+                  return false;
+                }
+              }
+            }
+          }
+        }
+      }
+      return true;
+    } catch (e) {
+      console.error('Error validating image data:', e);
+      return false;
+    }
+  };
+
   useEffect(() => {
     // Check if user is already authenticated
     const authToken = localStorage.getItem("adminAuth");
@@ -25,16 +91,80 @@ export default function AdminPage() {
       setIsAuthenticated(true);
     }
 
-    // Load data from localStorage if available
-    const savedData = localStorage.getItem("tourData");
-    if (savedData) {
+    // ALWAYS load from server first (source of truth), then use localStorage as fallback
+    const loadData = async () => {
       try {
-        const loadedData = JSON.parse(savedData);
-        setData(loadedData);
+        // First, try to load from server (always get latest)
+        const serverResponse = await fetch("/api/tour-data");
+        const serverData = await serverResponse.json();
+        
+        if (serverData && !serverData.error) {
+          // Validate server data
+          if (validateImageData(serverData)) {
+            setData(serverData);
+            console.log('Loaded data from server (source of truth)');
+            
+            // Update localStorage with server data (if it fits)
+            try {
+              const dataString = JSON.stringify(serverData);
+              const dataSize = new Blob([dataString]).size;
+              const maxSize = 4 * 1024 * 1024; // 4MB
+              
+              if (dataSize <= maxSize) {
+                localStorage.setItem("tourData", dataString);
+                localStorage.setItem("tourDataTimestamp", Date.now().toString());
+                console.log('Updated localStorage with server data');
+              } else {
+                console.warn('Server data too large for localStorage, skipping cache');
+                // Clear old localStorage if server data is too large
+                localStorage.removeItem("tourData");
+                localStorage.removeItem("tourDataTimestamp");
+              }
+            } catch (e: any) {
+              if (e.name === 'QuotaExceededError') {
+                console.warn('localStorage quota exceeded, using server data only');
+                localStorage.removeItem("tourData");
+                localStorage.removeItem("tourDataTimestamp");
+              }
+            }
+            return;
+          } else {
+            console.warn('Server data validation failed, trying localStorage');
+          }
+        }
       } catch (e) {
-        console.error("Error loading saved data:", e);
+        console.error('Error loading from server:', e);
+        // Fall through to localStorage fallback
       }
-    }
+      
+      // Fallback: Load from localStorage if server fails
+      const savedData = localStorage.getItem("tourData");
+      if (savedData) {
+        try {
+          const loadedData = JSON.parse(savedData);
+          
+          // Validate image data - if corrupted, clear localStorage
+          if (!validateImageData(loadedData)) {
+            console.warn('Corrupted image data detected in localStorage. Clearing.');
+            localStorage.removeItem("tourData");
+            localStorage.removeItem("tourDataTimestamp");
+            return;
+          }
+          
+          setData(loadedData);
+          console.log('Loaded data from localStorage (fallback)');
+        } catch (e) {
+          console.error("Error loading saved data:", e);
+          localStorage.removeItem("tourData");
+          localStorage.removeItem("tourDataTimestamp");
+        }
+      } else {
+        // Last resort: use static import
+        console.log('No server or localStorage data, using static import');
+      }
+    };
+    
+    loadData();
   }, []);
 
   // Sync itinerary length with overview.days
@@ -132,6 +262,48 @@ export default function AdminPage() {
   const handleLogout = () => {
     localStorage.removeItem("adminAuth");
     setIsAuthenticated(false);
+  };
+
+  const handleClearLocalStorage = () => {
+    if (confirm('Clear browser storage and reload from server? This will remove any unsaved changes in browser storage, but will reload the latest data from the server.')) {
+      localStorage.removeItem("tourData");
+      localStorage.removeItem("tourDataTimestamp");
+      
+      // Reload from server (source of truth)
+      fetch("/api/tour-data")
+        .then(res => res.json())
+        .then(serverData => {
+          if (serverData && !serverData.error) {
+            if (validateImageData(serverData)) {
+              setData(serverData);
+              
+              // Try to cache in localStorage if it fits
+              try {
+                const dataString = JSON.stringify(serverData);
+                const dataSize = new Blob([dataString]).size;
+                const maxSize = 4 * 1024 * 1024; // 4MB
+                
+                if (dataSize <= maxSize) {
+                  localStorage.setItem("tourData", dataString);
+                  localStorage.setItem("tourDataTimestamp", Date.now().toString());
+                }
+              } catch (e) {
+                // Ignore localStorage errors
+              }
+              
+              alert('Browser storage cleared. Latest data reloaded from server.');
+            } else {
+              alert('Warning: Server data validation failed. Please check the server data.');
+            }
+          } else {
+            alert('Error loading data from server. Please refresh the page.');
+          }
+        })
+        .catch(err => {
+          console.error('Error loading from server:', err);
+          alert('Error loading data from server. Please refresh the page.');
+        });
+    }
   };
 
   // Compress image before storing to reduce localStorage size
@@ -251,28 +423,18 @@ export default function AdminPage() {
 
   const handleSave = async () => {
     try {
+      // Validate image data before saving
+      if (!validateImageData(data)) {
+        alert('Warning: Some image data appears to be corrupted. Please re-upload any missing images before saving.');
+        // Continue anyway, but warn the user
+      }
+      
       const dataString = JSON.stringify(data);
       const dataSize = new Blob([dataString]).size;
       const maxSize = 4 * 1024 * 1024; // 4MB (localStorage limit is typically 5-10MB, but we'll be conservative)
 
-      // Check size before saving
-      if (dataSize > maxSize) {
-        alert(`Data is too large (${(dataSize / 1024 / 1024).toFixed(2)}MB). Please compress images or remove some photos. The data will still be saved to the server.`);
-        // Don't save to localStorage, but still try server
-      } else {
-        // Save to localStorage for client-side persistence
-        try {
-          localStorage.setItem("tourData", dataString);
-        } catch (e: any) {
-          if (e.name === 'QuotaExceededError') {
-            alert('Local storage quota exceeded (total data size too large). Data will be saved to server only. Consider removing some photos or using smaller/compressed images. The total size of all photos combined exceeds browser storage limits.');
-          } else {
-            throw e;
-          }
-        }
-      }
-      
-      // Also save to server via API (if available)
+      // ALWAYS save to server first (source of truth)
+      let serverSaveSuccess = false;
       try {
         const response = await fetch("/api/tour-data", {
           method: "POST",
@@ -283,22 +445,50 @@ export default function AdminPage() {
         });
         
         if (response.ok) {
+          serverSaveSuccess = true;
           setSaved(true);
           setTimeout(() => setSaved(false), 3000);
+          console.log('Data saved to server successfully');
         } else {
           console.error("Failed to save to server");
-          // Still mark as saved if localStorage worked
-          if (dataSize <= maxSize) {
-            setSaved(true);
-            setTimeout(() => setSaved(false), 3000);
-          }
+          throw new Error("Server save failed");
         }
       } catch (error) {
         console.error("Error saving to server:", error);
-        // Still mark as saved if localStorage worked
-        if (dataSize <= maxSize) {
-          setSaved(true);
-          setTimeout(() => setSaved(false), 3000);
+        alert('Error saving to server. Your changes may not be persisted. Please try again.');
+        return; // Don't continue if server save fails
+      }
+      
+      // Only save to localStorage if server save succeeded AND data fits
+      if (serverSaveSuccess) {
+        if (dataSize > maxSize) {
+          console.warn(`Data too large for localStorage (${(dataSize / 1024 / 1024).toFixed(2)}MB). Server save succeeded, but not caching in localStorage.`);
+          // Clear old localStorage to free space
+          localStorage.removeItem("tourData");
+          localStorage.removeItem("tourDataTimestamp");
+        } else {
+          // Save to localStorage for client-side persistence
+          try {
+            localStorage.setItem("tourData", dataString);
+            localStorage.setItem("tourDataTimestamp", Date.now().toString());
+            
+            // Verify the save was successful by reading it back
+            const verifyData = localStorage.getItem("tourData");
+            if (!verifyData || verifyData.length !== dataString.length) {
+              console.warn('localStorage save verification failed - data may be truncated');
+              // Don't alert, just log - server save succeeded which is what matters
+            } else {
+              console.log('Data cached in localStorage successfully');
+            }
+          } catch (e: any) {
+            if (e.name === 'QuotaExceededError') {
+              console.warn('Local storage quota exceeded. Server save succeeded, but not caching in localStorage.');
+              localStorage.removeItem("tourData");
+              localStorage.removeItem("tourDataTimestamp");
+            } else {
+              console.error('Error saving to localStorage:', e);
+            }
+          }
         }
       }
     } catch (error) {
@@ -357,13 +547,23 @@ export default function AdminPage() {
               {t.admin.subtitle}
             </p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center justify-center gap-2 px-4 py-2 text-sm sm:text-base text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors self-start sm:self-auto"
-          >
-            <LogOut className="w-4 h-4" />
-            {t.admin.logout}
-          </button>
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <button
+              onClick={handleClearLocalStorage}
+              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              title="Clear browser storage and reload from server (useful if images are missing)"
+            >
+              <X className="w-4 h-4" />
+              <span className="hidden sm:inline">Clear Storage</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center gap-2 px-4 py-2 text-sm sm:text-base text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              {t.admin.logout}
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -1348,7 +1548,18 @@ export default function AdminPage() {
                                     className="w-20 h-20 object-cover rounded-lg border border-gray-300"
                                     onError={(e) => {
                                       const target = e.target as HTMLImageElement;
-                                      target.style.display = 'none';
+                                      console.error('Image failed to load:', photo.substring(0, 50) + '...');
+                                      // Check if it's a base64 image that might be corrupted
+                                      if (photo.startsWith('data:image/')) {
+                                        if (!isValidBase64Image(photo)) {
+                                          console.warn('Corrupted base64 image detected');
+                                          // Show a warning instead of just hiding
+                                          target.alt = 'Image data corrupted - please re-upload';
+                                          target.style.border = '2px solid red';
+                                        }
+                                      }
+                                      // Don't hide, show error state instead
+                                      target.style.opacity = '0.5';
                                     }}
                                   />
                                   <div className="mt-1 text-xs text-gray-500 text-center">
@@ -1475,46 +1686,127 @@ export default function AdminPage() {
                         className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
                       />
                     </div>
-                    <div className="grid md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {t.itinerary.breakfast}
-                        </label>
-                        <input
-                          type="text"
-                          value={day.meals.breakfast || ""}
-                          onChange={(e) =>
-                            updateItineraryDayNested(index, "meals", "breakfast", e.target.value)
+                    <div className="space-y-6">
+                      {(['breakfast', 'lunch', 'dinner'] as const).map((mealType) => {
+                        const mealLabel = mealType === 'breakfast' ? t.itinerary.breakfast : mealType === 'lunch' ? t.itinerary.lunch : t.itinerary.dinner;
+                        const currentMeal = day.meals?.[mealType];
+                        
+                        // Support both old format (string) and new format (array of objects)
+                        let options: Array<{ en: string; zh: string; mapsLink: string }> = [];
+                        if (currentMeal) {
+                          if (typeof currentMeal === 'string') {
+                            // Convert old format to new format
+                            options = [{ en: currentMeal, zh: '', mapsLink: '' }];
+                          } else if (Array.isArray(currentMeal)) {
+                            options = currentMeal.map((opt: any) => 
+                              typeof opt === 'string' 
+                                ? { en: opt, zh: '', mapsLink: '' }
+                                : { en: opt.en || '', zh: opt.zh || '', mapsLink: opt.mapsLink || '' }
+                            );
                           }
-                          className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {t.itinerary.lunch}
-                        </label>
-                        <input
-                          type="text"
-                          value={day.meals.lunch || ""}
-                          onChange={(e) =>
-                            updateItineraryDayNested(index, "meals", "lunch", e.target.value)
-                          }
-                          className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {t.itinerary.dinner}
-                        </label>
-                        <input
-                          type="text"
-                          value={day.meals.dinner || ""}
-                          onChange={(e) =>
-                            updateItineraryDayNested(index, "meals", "dinner", e.target.value)
-                          }
-                          className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
-                        />
-                      </div>
+                        }
+                        
+                        return (
+                          <div key={mealType} className="border border-gray-200 rounded-lg p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <label className="block text-sm font-medium text-gray-700">
+                                {mealLabel}
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newOptions = [...options, { en: '', zh: '', mapsLink: '' }];
+                                  updateItineraryDayNested(index, "meals", mealType, newOptions);
+                                }}
+                                className="flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded"
+                              >
+                                <Plus className="w-3 h-3" />
+                                {t.admin.addMealOption}
+                              </button>
+                            </div>
+                            
+                            {options.length === 0 ? (
+                              <div className="text-sm text-gray-500 italic">
+                                {t.admin.noMealOptions || 'No options added. Click "Add Option" to add meal options.'}
+                              </div>
+                            ) : (
+                              <div className="space-y-3">
+                                {options.map((option, optIndex) => (
+                                  <div key={optIndex} className="border border-gray-200 rounded p-3 bg-gray-50">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <span className="text-xs font-medium text-gray-600">
+                                        {t.admin.mealOption || 'Option'} {optIndex + 1}
+                                      </span>
+                                      {options.length > 1 && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const newOptions = options.filter((_, i) => i !== optIndex);
+                                            updateItineraryDayNested(index, "meals", mealType, newOptions.length > 0 ? newOptions : null);
+                                          }}
+                                          className="text-red-600 hover:text-red-700 text-xs"
+                                        >
+                                          {t.admin.removeMealOption}
+                                        </button>
+                                      )}
+                                    </div>
+                                    <div className="space-y-2">
+                                      <div>
+                                        <label className="block text-xs text-gray-600 mb-1">
+                                          {t.admin.mealOptionEnglish}
+                                        </label>
+                                        <input
+                                          type="text"
+                                          value={option.en}
+                                          onChange={(e) => {
+                                            const newOptions = [...options];
+                                            newOptions[optIndex] = { ...option, en: e.target.value };
+                                            updateItineraryDayNested(index, "meals", mealType, newOptions);
+                                          }}
+                                          className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                                          placeholder="English text"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-xs text-gray-600 mb-1">
+                                          {t.admin.mealOptionChinese}
+                                        </label>
+                                        <input
+                                          type="text"
+                                          value={option.zh}
+                                          onChange={(e) => {
+                                            const newOptions = [...options];
+                                            newOptions[optIndex] = { ...option, zh: e.target.value };
+                                            updateItineraryDayNested(index, "meals", mealType, newOptions);
+                                          }}
+                                          className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                                          placeholder="中文"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-xs text-gray-600 mb-1">
+                                          {t.admin.mealOptionMapsLink}
+                                        </label>
+                                        <input
+                                          type="url"
+                                          value={option.mapsLink}
+                                          onChange={(e) => {
+                                            const newOptions = [...options];
+                                            newOptions[optIndex] = { ...option, mapsLink: e.target.value };
+                                            updateItineraryDayNested(index, "meals", mealType, newOptions);
+                                          }}
+                                          className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                                          placeholder="https://maps.google.com/..."
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                     <div>
                       <div className="flex items-center justify-between mb-3">

@@ -82,3 +82,6 @@ After deployment completes:
 - **Framework:** Next.js 16
 - **Build Command:** `npm run build`
 
+
+
+
