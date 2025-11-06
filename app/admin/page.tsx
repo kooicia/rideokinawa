@@ -1823,8 +1823,8 @@ export default function AdminPage() {
                 <div className="space-y-4">
                   {category.items.map((item, itemIndex) => {
                     // Support both string (legacy) and object format
-                    const itemEn = typeof item === 'string' ? item : (item.en || '');
-                    const itemZh = typeof item === 'string' ? '' : (item.zh || '');
+                    const itemEn = typeof item === 'string' ? item : ((item as any).en || '');
+                    const itemZh = typeof item === 'string' ? '' : ((item as any).zh || '');
                     
                     return (
                       <div key={itemIndex} className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50">
@@ -1916,8 +1916,8 @@ export default function AdminPage() {
                 <div className="space-y-4">
                   {(items as any[]).map((item, itemIndex) => {
                     // Support both string (legacy) and object format
-                    const itemEn = typeof item === 'string' ? item : (item.en || '');
-                    const itemZh = typeof item === 'string' ? '' : (item.zh || '');
+                    const itemEn = typeof item === 'string' ? item : ((item as any).en || '');
+                    const itemZh = typeof item === 'string' ? '' : ((item as any).zh || '');
                     
                     return (
                       <div key={itemIndex} className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50">
