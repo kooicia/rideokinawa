@@ -216,6 +216,7 @@ export default function AdminPage() {
               phone: "",
             },
             highlights: [],
+            highlightUrls: [],
             photos: [],
             notes: "",
             dayType: "ride",
@@ -1286,6 +1287,7 @@ export default function AdminPage() {
 
                           return mergedHighlights.map((highlight, highlightIndex) => {
                             const isDragging = draggedHighlightIndex?.dayIndex === index && draggedHighlightIndex?.highlightIndex === highlightIndex;
+                            const highlightUrls = (day as any).highlightUrls || [];
                             
                             return (
                               <div
@@ -1308,11 +1310,13 @@ export default function AdminPage() {
                                     const currentDay = newItinerary[index] as any;
                                     const highlightsEn = currentDay.highlights || [];
                                     const highlightsZh = currentDay.highlightsZh || [];
+                                    const highlightUrls = currentDay.highlightUrls || [];
                                     const maxLength = Math.max(highlightsEn.length, highlightsZh.length);
                                     const mergedHighlights = Array.from({ length: maxLength }, (_, i) => {
                                       const en = typeof highlightsEn[i] === 'string' ? highlightsEn[i] : ((highlightsEn[i] as any)?.en || '');
                                       const zh = highlightsZh[i] || ((highlightsEn[i] as any)?.zh || '');
-                                      return { en, zh };
+                                      const url = highlightUrls[i] || '';
+                                      return { en, zh, url };
                                     });
                                     
                                     // Reorder
@@ -1322,11 +1326,13 @@ export default function AdminPage() {
                                     // Split back into separate arrays
                                     const newHighlightsEn = mergedHighlights.map(h => h.en);
                                     const newHighlightsZh = mergedHighlights.map(h => h.zh);
+                                    const newHighlightUrls = mergedHighlights.map(h => h.url);
                                     
                                     newItinerary[index] = {
                                       ...currentDay,
                                       highlights: newHighlightsEn,
                                       highlightsZh: newHighlightsZh,
+                                      highlightUrls: newHighlightUrls,
                                     };
                                     setData({ ...data, itinerary: newItinerary });
                                   }
@@ -1412,6 +1418,30 @@ export default function AdminPage() {
                                       className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
                                     />
                                   </div>
+                                  <div>
+                                    <label className="block text-xs text-gray-600 mb-1">
+                                      {t.admin.highlightUrl}
+                                    </label>
+                                    <input
+                                      type="url"
+                                      value={highlightUrls[highlightIndex] || ''}
+                                      onChange={(e) => {
+                                        const newItinerary = [...data.itinerary];
+                                        const currentDay = newItinerary[index] as any;
+                                        const highlightUrls = currentDay.highlightUrls || [];
+                                        const newHighlightUrls = [...highlightUrls];
+                                        newHighlightUrls[highlightIndex] = e.target.value;
+                                        
+                                        newItinerary[index] = {
+                                          ...currentDay,
+                                          highlightUrls: newHighlightUrls,
+                                        };
+                                        setData({ ...data, itinerary: newItinerary });
+                                      }}
+                                      className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base"
+                                      placeholder="https://maps.app.goo.gl/..."
+                                    />
+                                  </div>
                                 </div>
                                 <button
                                   onClick={() => {
@@ -1419,6 +1449,7 @@ export default function AdminPage() {
                                     const currentDay = newItinerary[index] as any;
                                     const highlightsEn = currentDay.highlights || [];
                                     const highlightsZh = currentDay.highlightsZh || [];
+                                    const highlightUrls = currentDay.highlightUrls || [];
                                     const maxLength = Math.max(highlightsEn.length, highlightsZh.length);
                                     const mergedHighlights = Array.from({ length: maxLength }, (_, i) => {
                                       const en = typeof highlightsEn[i] === 'string' ? highlightsEn[i] : ((highlightsEn[i] as any)?.en || '');
@@ -1428,6 +1459,10 @@ export default function AdminPage() {
                                     
                                     mergedHighlights.splice(highlightIndex, 1);
                                     
+                                    // Remove URL at the same index
+                                    const newHighlightUrls = [...highlightUrls];
+                                    newHighlightUrls.splice(highlightIndex, 1);
+                                    
                                     // Split back into separate arrays
                                     const newHighlightsEn = mergedHighlights.map(h => h.en);
                                     const newHighlightsZh = mergedHighlights.map(h => h.zh);
@@ -1436,6 +1471,7 @@ export default function AdminPage() {
                                       ...currentDay,
                                       highlights: newHighlightsEn,
                                       highlightsZh: newHighlightsZh,
+                                      highlightUrls: newHighlightUrls,
                                     };
                                     setData({ ...data, itinerary: newItinerary });
                                   }}
@@ -1453,13 +1489,16 @@ export default function AdminPage() {
                             const currentDay = newItinerary[index] as any;
                             const highlightsEn = currentDay.highlights || [];
                             const highlightsZh = currentDay.highlightsZh || [];
+                            const highlightUrls = currentDay.highlightUrls || [];
                             const newHighlightsEn = [...highlightsEn, ''];
                             const newHighlightsZh = [...highlightsZh, ''];
+                            const newHighlightUrls = [...highlightUrls, ''];
                             
                             newItinerary[index] = {
                               ...currentDay,
                               highlights: newHighlightsEn,
                               highlightsZh: newHighlightsZh,
+                              highlightUrls: newHighlightUrls,
                             };
                             setData({ ...data, itinerary: newItinerary });
                           }}

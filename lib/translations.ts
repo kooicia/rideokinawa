@@ -156,6 +156,7 @@ export interface Translations {
     mealOptionMapsLink: string;
     mealOption: string;
     noMealOptions: string;
+    highlightUrl: string;
   };
 }
 
@@ -315,6 +316,7 @@ export const translations: Record<Language, Translations> = {
       mealOptionMapsLink: 'Google Maps Link',
       mealOption: 'Option',
       noMealOptions: 'No options added. Click "Add Option" to add meal options.',
+      highlightUrl: 'URL (Optional)',
     },
   },
   'zh-TW': {
@@ -473,6 +475,7 @@ export const translations: Record<Language, Translations> = {
       mealOptionMapsLink: 'Google 地圖連結',
       mealOption: '選項',
       noMealOptions: '尚未新增選項。點擊「新增選項」以新增餐點選項。',
+      highlightUrl: '連結（選填）',
     },
   },
 };

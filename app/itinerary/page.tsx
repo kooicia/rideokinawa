@@ -29,6 +29,32 @@ export default function ItineraryPage() {
   }, []);
   
   const { itinerary } = tourData;
+  
+  // Helper function to detect and linkify URLs in text
+  const linkifyText = (text: string) => {
+    if (!text) return null;
+    
+    // URL regex pattern
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    
+    return parts.map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 underline"
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxPhotos, setLightboxPhotos] = useState<string[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -518,9 +544,9 @@ export default function ItineraryPage() {
                   <div className="mb-4 sm:mb-6" suppressHydrationWarning>
                     <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-2 sm:mb-3">{t.itinerary.dayDescription}</h3>
                     <p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line">
-                      {language === 'zh-TW' 
+                      {linkifyText(language === 'zh-TW' 
                         ? ((day as any).descriptionZh || day.description)
-                        : (day.description || (day as any).descriptionZh)}
+                        : (day.description || (day as any).descriptionZh))}
                     </p>
                   </div>
                 )}
@@ -530,15 +556,36 @@ export default function ItineraryPage() {
                   <div className="mb-4 sm:mb-6" suppressHydrationWarning>
                     <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-2 sm:mb-3">{t.itinerary.highlights}</h3>
                     <ul className="space-y-1.5 sm:space-y-2" suppressHydrationWarning>
-                      {(language === 'zh-TW' 
-                        ? ((day as any).highlightsZh || day.highlights)
-                        : (day.highlights || (day as any).highlightsZh)
-                      )?.map((highlight: string, index: number) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-1">•</span>
-                          <span className="text-sm sm:text-base text-gray-700">{highlight}</span>
-                        </li>
-                      ))}
+                      {(() => {
+                        const highlights = language === 'zh-TW' 
+                          ? ((day as any).highlightsZh || day.highlights)
+                          : (day.highlights || (day as any).highlightsZh);
+                        
+                        const highlightUrls = (day as any).highlightUrls || [];
+                        
+                        return highlights?.map((highlight: string, index: number) => {
+                          const url = highlightUrls[index] || null;
+                          
+                          return (
+                            <li key={index} className="flex items-start gap-2">
+                              <span className="text-blue-600 mt-1">•</span>
+                              {url ? (
+                                <a
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm sm:text-base text-gray-700 hover:text-blue-600 transition-colors inline-flex items-center gap-1"
+                                >
+                                  {highlight}
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
+                              ) : (
+                                <span className="text-sm sm:text-base text-gray-700">{highlight}</span>
+                              )}
+                            </li>
+                          );
+                        });
+                      })()}
                     </ul>
                   </div>
                 )}
