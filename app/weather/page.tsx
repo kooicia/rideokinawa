@@ -57,6 +57,7 @@ export default function WeatherPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showingCurrentWeek, setShowingCurrentWeek] = useState(false);
+  const [forecastLimitedEndDate, setForecastLimitedEndDate] = useState<string | null>(null);
   const { t } = useLanguage();
 
   const { weather: weatherConfig, itinerary } = tourData;
@@ -66,6 +67,7 @@ export default function WeatherPage() {
       try {
         setLoading(true);
         setError(null);
+        setForecastLimitedEndDate(null);
         
         if (!itinerary || itinerary.length === 0) {
           throw new Error("No itinerary data available");
@@ -98,30 +100,65 @@ export default function WeatherPage() {
         let fetchEndDate: string;
         let showCurrentWeek = false;
         let useArchiveApi = false;
+        let limitedForecastEnd: string | null = null;
         
         if (daysSinceEnd >= 0) {
           // Tour has ended - show historical weather for actual travel dates
           fetchStartDate = startDate;
           fetchEndDate = endDate;
           useArchiveApi = true; // Tour has ended, use archive API
-          setShowingCurrentWeek(false);
+          showCurrentWeek = false;
         } else if (daysUntilStart > 14) {
           // Tour is more than 14 days away - show current week forecast
           const currentWeekEnd = new Date(today);
           currentWeekEnd.setDate(currentWeekEnd.getDate() + 6); // 7 days total (today + 6 more days)
-          
-          fetchStartDate = today.toISOString().split('T')[0];
-          fetchEndDate = currentWeekEnd.toISOString().split('T')[0];
+
+          fetchStartDate = today.toISOString().split("T")[0];
+          fetchEndDate = currentWeekEnd.toISOString().split("T")[0];
           useArchiveApi = false; // Current week is always in future, use forecast API
           showCurrentWeek = true;
-          setShowingCurrentWeek(true);
         } else {
           // Tour is within 14 days - show forecast for tour dates
           fetchStartDate = startDate;
           fetchEndDate = endDate;
           useArchiveApi = false; // Tour dates are in future, use forecast API
-          setShowingCurrentWeek(false);
+          showCurrentWeek = false;
         }
+
+        if (!useArchiveApi && !showCurrentWeek) {
+          const MAX_FORECAST_DAYS = 16; // Open-Meteo forecast range
+          const minAllowedDate = new Date(today);
+          const maxAllowedDate = new Date(today);
+          maxAllowedDate.setDate(maxAllowedDate.getDate() + (MAX_FORECAST_DAYS - 1));
+
+          let fetchStartDateObj = new Date(fetchStartDate);
+          let fetchEndDateObj = new Date(fetchEndDate);
+
+          if (fetchStartDateObj < minAllowedDate) {
+            fetchStartDateObj = new Date(minAllowedDate);
+          }
+
+          if (fetchEndDateObj > maxAllowedDate) {
+            fetchEndDateObj = new Date(maxAllowedDate);
+            limitedForecastEnd = maxAllowedDate.toISOString().split("T")[0];
+          }
+
+          if (fetchEndDateObj < fetchStartDateObj) {
+            // After clamping there's no valid range, fall back to current week
+            showCurrentWeek = true;
+            const currentWeekEnd = new Date(minAllowedDate);
+            currentWeekEnd.setDate(currentWeekEnd.getDate() + 6);
+            fetchStartDateObj = new Date(minAllowedDate);
+            fetchEndDateObj = currentWeekEnd;
+            limitedForecastEnd = null;
+          }
+
+          fetchStartDate = fetchStartDateObj.toISOString().split("T")[0];
+          fetchEndDate = fetchEndDateObj.toISOString().split("T")[0];
+        }
+
+        setShowingCurrentWeek(showCurrentWeek);
+        setForecastLimitedEndDate(limitedForecastEnd);
         
         // Use archive API for historical data, forecast API for current/future dates
         const apiBase = useArchiveApi
@@ -179,6 +216,7 @@ export default function WeatherPage() {
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         setError(errorMessage || t.weather.error);
+        setForecastLimitedEndDate(null);
         console.error("Weather fetch error:", err);
       } finally {
         setLoading(false);
@@ -233,6 +271,17 @@ export default function WeatherPage() {
             </p>
             <p className="text-sm sm:text-base text-amber-700 text-center font-medium">
               {t.weather.currentWeekForecast}
+            </p>
+          </div>
+        )}
+
+        {forecastLimitedEndDate && !showingCurrentWeek && !loading && !error && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 sm:p-6 mb-6">
+            <p className="text-sm sm:text-base text-amber-800 mb-2 text-center font-semibold">
+              {t.weather.limitedRangeTitle}
+            </p>
+            <p className="text-sm sm:text-base text-amber-700 text-center">
+              {t.weather.limitedRangeDescription.replace("{date}", formatDate(forecastLimitedEndDate))}
             </p>
           </div>
         )}

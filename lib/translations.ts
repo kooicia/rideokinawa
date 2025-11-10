@@ -75,6 +75,8 @@ export interface Translations {
     travelDatesMoreThan14Days: string;
     checkBackCloser: string;
     currentWeekForecast: string;
+    limitedRangeTitle: string;
+    limitedRangeDescription: string;
   };
   packing: {
     title: string;
@@ -235,6 +237,8 @@ export const translations: Record<Language, Translations> = {
       travelDatesMoreThan14Days: 'Your travel dates are more than 14 days away. Please check back closer to the travel dates for weather forecast.',
       checkBackCloser: 'Please check back closer to the travel dates for weather forecast.',
       currentWeekForecast: 'Below is the current weather forecast for this week:',
+      limitedRangeTitle: 'Partial Forecast Shown',
+      limitedRangeDescription: 'Forecast data is currently available only through {date}. Dates beyond this range have not been published yet.',
     },
     packing: {
       title: 'Packing Recommendations',
@@ -384,16 +388,18 @@ export const translations: Record<Language, Translations> = {
     },
     weather: {
       title: '天氣預報',
-      subtitle: '每日天氣預報',
-      loading: '載入天氣預報中...',
-      error: '無法載入天氣預報，請稍後再試。',
+      subtitle: '查看目的地的即時天氣狀況：',
+      loading: '正在取得天氣預報…',
+      error: '目前無法取得天氣資訊，請稍後再試。',
       precipitation: '降雨量',
       windSpeed: '風速',
-      note: '注意：',
-      noteText: '天氣預報每日從 Open-Meteo 更新。天氣狀況可能變化，請在出發日期前再次確認預報。',
-      travelDatesMoreThan14Days: '您的旅行日期距離現在超過14天。請在接近旅行日期時再次查看天氣預報。',
-      checkBackCloser: '請在接近旅行日期時再次查看天氣預報。',
-      currentWeekForecast: '以下是本週的目前天氣預報：',
+      note: '提醒：',
+      noteText: '天氣可能隨時變動，建議在出發前再次查看最新預報。',
+      travelDatesMoreThan14Days: '您的行程日期距今超過 14 天，天氣預報僅提供未來 14 天內的資訊。',
+      checkBackCloser: '請接近出發日期時再查看。',
+      currentWeekForecast: '目前改為顯示本週預報。',
+      limitedRangeTitle: '僅顯示部分天氣預報',
+      limitedRangeDescription: '目前僅提供至 {date} 的預報，超出範圍的日期尚未發布。',
     },
     packing: {
       title: '打包建議',
