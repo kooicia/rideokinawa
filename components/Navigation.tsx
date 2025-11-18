@@ -38,10 +38,15 @@ export default function Navigation() {
           <div className="flex items-center justify-between h-16">
             <Link 
               href="/" 
-              className="font-playfair text-lg sm:text-xl font-semibold text-gray-900"
+              className="flex items-center gap-2 font-playfair text-lg sm:text-xl font-semibold text-gray-900"
               onClick={() => setMobileMenuOpen(false)}
             >
-              {language === 'zh-TW' ? '118T環沖繩' : '118T Ride Okinawa'}
+              <img 
+                src="/logo.png" 
+                alt="118T Logo" 
+                className="h-8 w-auto"
+              />
+              <span>{language === 'zh-TW' ? '118T環沖繩' : '118T Ride Okinawa'}</span>
             </Link>
             
             {/* Desktop Navigation */}

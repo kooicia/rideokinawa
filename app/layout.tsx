@@ -19,6 +19,13 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "118T Ride Okinawa",
   description: "Experience the beauty of Okinawa on this 7-day cycling adventure",
+  icons: {
+    icon: [
+      { url: '/logo.png', type: 'image/png' },
+    ],
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export const viewport: Viewport = {
