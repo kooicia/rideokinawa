@@ -62,6 +62,17 @@ export interface Translations {
       friday: string;
       saturday: string;
       daySuffix?: string;
+      routeDetails: string;
+      routeStopName: string;
+      routeStopAddress: string;
+      routeStopDistance: string;
+      routeStopTags: string;
+      tagFood: string;
+      tagToilet: string;
+      tagScenery: string;
+      tagRest: string;
+      tagHotel: string;
+      tagLunch: string;
     };
   weather: {
     title: string;
@@ -183,54 +194,6 @@ export interface Translations {
     routeStopNumber: string;
     csvFormatHint: string;
   };
-  itinerary: {
-    title: string;
-    subtitle: string;
-    day: string;
-    arrivalDay: string;
-    departureDay: string;
-    freeAndEasy: string;
-    rideDay: string;
-    departure: string;
-    route: string;
-    location: string;
-    distance: string;
-    elevationGain: string;
-    dayDescription: string;
-    highlights: string;
-    meals: string;
-    breakfast: string;
-    lunch: string;
-    dinner: string;
-    accommodation: string;
-    photos: string;
-    flightInformation: string;
-    flightNumber: string;
-      flightDetails: string;
-      departureTime: string;
-      arrivalTime: string;
-      routeMap: string;
-      elevationProfile: string;
-      sunday: string;
-      monday: string;
-      tuesday: string;
-      wednesday: string;
-      thursday: string;
-      friday: string;
-      saturday: string;
-      daySuffix?: string;
-      routeDetails: string;
-      routeStopName: string;
-      routeStopAddress: string;
-      routeStopDistance: string;
-      routeStopTags: string;
-      tagFood: string;
-      tagToilet: string;
-      tagScenery: string;
-      tagRest: string;
-      tagHotel: string;
-      tagLunch: string;
-    };
 }
 
 export const translations: Record<Language, Translations> = {
@@ -490,6 +453,17 @@ export const translations: Record<Language, Translations> = {
       thursday: '星期四',
       friday: '星期五',
       saturday: '星期六',
+      routeDetails: '路線詳情',
+      routeStopName: '名稱',
+      routeStopAddress: '地址',
+      routeStopDistance: '距離',
+      routeStopTags: '標籤',
+      tagFood: '餐點',
+      tagToilet: '廁所',
+      tagScenery: '風景',
+      tagRest: '休息',
+      tagHotel: '飯店',
+      tagLunch: '午餐',
     },
     weather: {
       title: '天氣預報',
@@ -610,54 +584,6 @@ export const translations: Record<Language, Translations> = {
       noRouteStops: '尚未新增停靠點。點擊「新增停靠點」以新增停靠點。',
       routeStopNumber: '停靠點',
       csvFormatHint: 'CSV 必須包含標題列。欄位順序可彈性調整。範例標題：「名稱（英文）」、「名稱（中文）」、「地址」、「網址」、「距離（公里）」、「標籤」',
-    },
-    itinerary: {
-      title: '每日行程',
-      subtitle: '詳細的每日行程安排',
-      day: '第',
-      daySuffix: '天',
-      arrivalDay: '抵達',
-      departureDay: '出發',
-      freeAndEasy: '自由活動',
-      rideDay: '騎行',
-      departure: '出發時間',
-      route: '路線',
-      location: '地點',
-      distance: '距離',
-      elevationGain: '爬升',
-      dayDescription: '行程說明',
-      highlights: '行程亮點',
-      meals: '餐點',
-      breakfast: '早餐',
-      lunch: '午餐',
-      dinner: '晚餐',
-      accommodation: '住宿',
-      photos: '照片',
-      flightInformation: '航班資訊',
-      flightNumber: '航班號碼',
-      flightDetails: '航班詳情',
-      departureTime: '出發時間',
-      arrivalTime: '抵達時間',
-      routeMap: '路線地圖',
-      elevationProfile: '海拔剖面圖',
-      sunday: '星期日',
-      monday: '星期一',
-      tuesday: '星期二',
-      wednesday: '星期三',
-      thursday: '星期四',
-      friday: '星期五',
-      saturday: '星期六',
-      routeDetails: '路線詳情',
-      routeStopName: '名稱',
-      routeStopAddress: '地址',
-      routeStopDistance: '距離',
-      routeStopTags: '標籤',
-      tagFood: '餐點',
-      tagToilet: '廁所',
-      tagScenery: '風景',
-      tagRest: '休息',
-      tagHotel: '飯店',
-      tagLunch: '午餐',
     },
   },
 };
