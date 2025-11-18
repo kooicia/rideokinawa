@@ -41,7 +41,7 @@ export default function Navigation() {
               className="font-playfair text-lg sm:text-xl font-semibold text-gray-900"
               onClick={() => setMobileMenuOpen(false)}
             >
-              {language === 'zh-TW' ? '沖繩單車之旅' : 'Okinawa Bike Tour'}
+              {language === 'zh-TW' ? '118T環沖繩' : '118T Ride Okinawa'}
             </Link>
             
             {/* Desktop Navigation */}

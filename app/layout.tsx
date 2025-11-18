@@ -17,7 +17,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Okinawa Bike Tour",
+  title: "118T Ride Okinawa",
   description: "Experience the beauty of Okinawa on this 7-day cycling adventure",
 };
 
