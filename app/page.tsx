@@ -35,8 +35,15 @@ export default function Home() {
   return (
     <div className="min-h-screen pt-16 pb-16 md:pb-0">
       {/* Hero Section */}
-      <section className="relative h-[500px] flex items-center justify-center bg-gradient-to-br from-blue-200 via-blue-50 to-green-200">
+      <section className="relative h-[500px] flex items-center justify-center bg-gradient-to-br from-blue-200 via-blue-50 to-green-200 overflow-hidden">
         <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-40"></div>
+        {/* Okinawa Island Outline */}
+        <img
+          src="/okinawa-outline.png"
+          alt="Okinawa Island Outline"
+          className="absolute inset-0 w-full h-full object-contain"
+          style={{ objectPosition: 'center', opacity: 0.03 }}
+        />
         <div className="relative z-10 text-center max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-2">
             {overview.title}
