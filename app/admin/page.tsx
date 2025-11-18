@@ -217,10 +217,15 @@ export default function AdminPage() {
             },
             highlights: [],
             highlightUrls: [],
+            highlightsEnabled: true,
             photos: [],
             notes: "",
             dayType: "ride",
             description: "",
+            routeDetails: {
+              enabled: false,
+              stops: [],
+            },
           };
           newItinerary.push(defaultDay);
         }
@@ -1269,23 +1274,532 @@ export default function AdminPage() {
                         placeholder="描述這一天的行程，參與者可以期待什麼..."
                       />
                     </div>
+                    
+                    {/* Route Details Section */}
+                    <div className="border-t border-gray-200 pt-4 mt-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t.admin.routeDetails}
+                          </label>
+                          <p className="text-xs text-gray-500">{t.admin.routeDetailsSubtitle}</p>
+                        </div>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={(day as any).routeDetails?.enabled || false}
+                            onChange={(e) => {
+                              const newItinerary = [...data.itinerary];
+                              const currentDay = newItinerary[index] as any;
+                              if (!currentDay.routeDetails) {
+                                currentDay.routeDetails = { enabled: false, stops: [] };
+                              }
+                              currentDay.routeDetails.enabled = e.target.checked;
+                              setData({ ...data, itinerary: newItinerary });
+                            }}
+                            className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900"
+                          />
+                          <span className="text-sm text-gray-700">
+                            {(day as any).routeDetails?.enabled ? t.admin.routeDetailsEnabled : t.admin.routeDetailsDisabled}
+                          </span>
+                        </label>
+                      </div>
+                      
+                      {(day as any).routeDetails?.enabled && (
+                        <div className="space-y-4 mt-4">
+                          {/* CSV Import */}
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              {t.admin.importFromCSV}
+                            </label>
+                            <input
+                              type="file"
+                              accept=".csv"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                
+                                const reader = new FileReader();
+                                reader.onload = (event) => {
+                                  try {
+                                    // Read as UTF-8 to preserve Chinese characters
+                                    const csvText = event.target?.result as string;
+                                    // Handle different line endings (Windows \r\n, Unix \n, Mac \r)
+                                    const lines = csvText.split(/\r?\n|\r/).filter(line => line.trim());
+                                    
+                                    if (lines.length === 0) {
+                                      alert('CSV file is empty.');
+                                      return;
+                                    }
+                                    
+                                    // Helper function to parse CSV line (handle quoted fields)
+                                    const parseCSVLine = (line: string): string[] => {
+                                      const values: string[] = [];
+                                      let current = '';
+                                      let inQuotes = false;
+                                      
+                                      for (let j = 0; j < line.length; j++) {
+                                        const char = line[j];
+                                        if (char === '"') {
+                                          inQuotes = !inQuotes;
+                                        } else if (char === ',' && !inQuotes) {
+                                          values.push(current.trim());
+                                          current = '';
+                                        } else {
+                                          current += char;
+                                        }
+                                      }
+                                      values.push(current.trim());
+                                      return values;
+                                    };
+                                    
+                                    // Helper function to normalize header name for matching (preserves Chinese characters)
+                                    const normalizeHeader = (header: string): string => {
+                                      // Only lowercase English characters, preserve Chinese
+                                      const hasChinese = /[\u4e00-\u9fff]/.test(header);
+                                      if (hasChinese) {
+                                        // For Chinese headers, just remove spaces, underscores, hyphens, and parentheses
+                                        return header.replace(/[_\s-]/g, '').replace(/\(.*?\)/g, '').trim();
+                                      } else {
+                                        // For English headers, lowercase and remove spaces, underscores, hyphens, and parentheses
+                                        return header.toLowerCase()
+                                          .replace(/[_\s-]/g, '')
+                                          .replace(/\(.*?\)/g, '')
+                                          .trim();
+                                      }
+                                    };
+                                    
+                                    // Helper function to find column index by header name
+                                    const findColumnIndex = (headers: string[], patterns: string[], excludeIndices: number[] = []): number => {
+                                      for (const pattern of patterns) {
+                                        const normalizedPattern = normalizeHeader(pattern);
+                                        const hasChinese = /[\u4e00-\u9fff]/.test(pattern);
+                                        
+                                        for (let i = 0; i < headers.length; i++) {
+                                          // Skip excluded indices (e.g., already used by English name)
+                                          if (excludeIndices.includes(i)) continue;
+                                          
+                                          const normalizedHeader = normalizeHeader(headers[i]);
+                                          
+                                          // For Chinese patterns, prioritize exact matches
+                                          if (hasChinese) {
+                                            // Direct Chinese character match (most reliable)
+                                            if (headers[i].includes(pattern)) {
+                                              return i;
+                                            }
+                                            // Exact normalized match
+                                            if (normalizedHeader === normalizedPattern) {
+                                              return i;
+                                            }
+                                          } else {
+                                            // For English patterns, exact match first
+                                            if (normalizedHeader === normalizedPattern) {
+                                              return i;
+                                            }
+                                            // Then check if header contains pattern (but be more strict)
+                                            // Only match if pattern is substantial (not just "name" matching "name english")
+                                            if (normalizedPattern.length >= 4 && normalizedHeader.includes(normalizedPattern)) {
+                                              return i;
+                                            }
+                                            // Or if pattern contains header (for short patterns like "en")
+                                            if (normalizedPattern.length < 4 && normalizedPattern.includes(normalizedHeader)) {
+                                              return i;
+                                            }
+                                          }
+                                        }
+                                      }
+                                      return -1;
+                                    };
+                                    
+                                    // Parse header row
+                                    const headerLine = lines[0];
+                                    const headers = parseCSVLine(headerLine);
+                                    
+                                    // Debug: Log headers for troubleshooting
+                                    console.log('CSV Headers found:', headers);
+                                    
+                                    // Map headers to field indices
+                                    // Search for English name first (more specific patterns first)
+                                    const nameEnIndex = findColumnIndex(headers, [
+                                      'name (english)', 'name english', 'english name', 'name en', 
+                                      'nameen', 'english', 'en'
+                                    ]);
+                                    
+                                    // Search for Chinese name - exclude the English name column to avoid conflicts
+                                    // Only use specific Chinese patterns, don't fall back to generic 'name'
+                                    const nameZhIndex = findColumnIndex(headers, [
+                                      'name (chinese)', 'name chinese', 'chinese name', 'name zh',
+                                      'namezh', 'chinese', 'zh', '中文', '名稱'
+                                    ], nameEnIndex !== -1 ? [nameEnIndex] : []);
+                                    
+                                    // If no specific English name column found, try generic 'name' as fallback
+                                    // But only if Chinese name column is different or not found
+                                    const genericNameIndex = nameEnIndex === -1 
+                                      ? findColumnIndex(headers, ['name']) 
+                                      : -1;
+                                    const finalNameEnIndex = nameEnIndex !== -1 ? nameEnIndex : genericNameIndex;
+                                    
+                                    // Debug: Log found indices
+                                    console.log('Name (English) column index:', finalNameEnIndex);
+                                    console.log('Name (Chinese) column index:', nameZhIndex);
+                                    console.log('Headers:', headers);
+                                    
+                                    // Ensure English and Chinese don't use the same column
+                                    if (finalNameEnIndex === nameZhIndex && finalNameEnIndex !== -1) {
+                                      console.warn('Warning: English and Chinese name columns are the same. Chinese name will be empty.');
+                                      console.warn('If you have separate columns, check that your CSV headers match: "Name (English)" and "Name (Chinese)"');
+                                    } else if (nameZhIndex !== -1) {
+                                      console.log('Chinese name column found successfully at index:', nameZhIndex, 'Header:', headers[nameZhIndex]);
+                                    } else {
+                                      console.warn('Chinese name column not found. Available headers:', headers);
+                                    }
+                                    
+                                    const addressIndex = findColumnIndex(headers, [
+                                      'address', 'location', 'addr', '地點', '地址'
+                                    ]);
+                                    
+                                    const urlIndex = findColumnIndex(headers, [
+                                      'url', 'link', 'maps', 'google maps', 'googlemaps', 
+                                      'map link', '地圖', '連結'
+                                    ]);
+                                    
+                                    const distanceIndex = findColumnIndex(headers, [
+                                      'distance', 'dist', 'km', 'distance (km)', '距離'
+                                    ]);
+                                    
+                                    const tagsIndex = findColumnIndex(headers, [
+                                      'tags', 'tag', 'category', 'categories', '標籤'
+                                    ]);
+                                    
+                                    // Validate required columns
+                                    if (finalNameEnIndex === -1 && nameZhIndex === -1) {
+                                      alert('CSV must contain at least one name column (English or Chinese).');
+                                      return;
+                                    }
+                                    
+                                    // Parse data rows
+                                    const stops: any[] = [];
+                                    for (let i = 1; i < lines.length; i++) {
+                                      const line = lines[i].trim();
+                                      if (!line) continue;
+                                      
+                                      const values = parseCSVLine(line);
+                                      
+                                      // Debug: Log first row values for troubleshooting
+                                      if (i === 1) {
+                                        console.log('First data row values:', values);
+                                      }
+                                      
+                                      // Extract values using mapped indices (preserve Chinese characters)
+                                      const nameEn = finalNameEnIndex >= 0 && finalNameEnIndex < values.length 
+                                        ? (values[finalNameEnIndex] || '').trim() : '';
+                                      // Extract Chinese name - only skip if it's the exact same column as English
+                                      // (to prevent English name from appearing in Chinese field)
+                                      let nameZh = '';
+                                      if (nameZhIndex >= 0 && nameZhIndex < values.length) {
+                                        // Only use Chinese column if it's different from English column
+                                        if (nameZhIndex !== finalNameEnIndex) {
+                                          nameZh = (values[nameZhIndex] || '').trim();
+                                        } else {
+                                          // Same column - leave Chinese empty to avoid duplicating English
+                                          nameZh = '';
+                                        }
+                                      }
+                                      const address = addressIndex >= 0 && addressIndex < values.length 
+                                        ? (values[addressIndex] || '').trim() : '';
+                                      const url = urlIndex >= 0 && urlIndex < values.length 
+                                        ? (values[urlIndex] || '').trim() : '';
+                                      // Parse distance - handle formats like "0km", "0", "5.2km", etc.
+                                      let distance = 0;
+                                      if (distanceIndex >= 0 && distanceIndex < values.length) {
+                                        const distanceStr = (values[distanceIndex] || '').trim();
+                                        if (distanceStr) {
+                                          // Remove "km" suffix if present, then parse
+                                          const cleanedDistance = distanceStr.replace(/km$/i, '').trim();
+                                          const parsed = parseFloat(cleanedDistance);
+                                          // parseFloat returns NaN for invalid input, use 0 as fallback
+                                          // But allow 0 as a valid value (starting point)
+                                          distance = isNaN(parsed) ? 0 : parsed;
+                                        }
+                                      }
+                                      const tagsStr = tagsIndex >= 0 && tagsIndex < values.length 
+                                        ? (values[tagsIndex] || '').trim() : '';
+                                      const tags = tagsStr.split(',').map(t => t.trim()).filter(t => t);
+                                      
+                                      // Debug: Log extracted values for first row
+                                      if (i === 1) {
+                                        console.log('Extracted values - nameEn:', nameEn, 'nameZh:', nameZh);
+                                      }
+                                      
+                                      // Only add if at least one name is present
+                                      if (nameEn || nameZh) {
+                                        stops.push({
+                                          nameEn: nameEn,
+                                          nameZh: nameZh,
+                                          address: address,
+                                          url: url,
+                                          distance: distance,
+                                          tags: tags,
+                                        });
+                                      }
+                                    }
+                                    
+                                    if (stops.length > 0) {
+                                      const newItinerary = [...data.itinerary];
+                                      const currentDay = newItinerary[index] as any;
+                                      if (!currentDay.routeDetails) {
+                                        currentDay.routeDetails = { enabled: true, stops: [] };
+                                      }
+                                      currentDay.routeDetails.stops = stops;
+                                      setData({ ...data, itinerary: newItinerary });
+                                      alert(`Imported ${stops.length} route stop(s) from CSV.`);
+                                    } else {
+                                      alert('No valid route stops found in CSV file. Please ensure at least one name column is present.');
+                                    }
+                                  } catch (error) {
+                                    console.error('Error parsing CSV:', error);
+                                    alert('Error parsing CSV file. Please check the format.');
+                                  }
+                                };
+                                reader.readAsText(file);
+                                e.target.value = ''; // Reset input
+                              }}
+                              className="w-full text-xs sm:text-sm text-gray-700 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                            />
+                            <p className="mt-1 text-xs text-gray-600">{t.admin.importFromCSVHint}</p>
+                            <p className="mt-1 text-xs text-gray-500">{t.admin.csvFormatHint}</p>
+                          </div>
+                          
+                          {/* Route Stops List */}
+                          {((day as any).routeDetails?.stops || []).length === 0 ? (
+                            <div className="text-center py-4 text-sm text-gray-500 border border-gray-200 rounded-lg">
+                              {t.admin.noRouteStops}
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              {((day as any).routeDetails?.stops || []).map((stop: any, stopIndex: number) => (
+                                <div key={stopIndex} className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <span className="text-sm font-medium text-gray-700">
+                                      {t.admin.routeStopNumber} {stopIndex + 1}
+                                    </span>
+                                    <button
+                                      onClick={() => {
+                                        const newItinerary = [...data.itinerary];
+                                        const currentDay = newItinerary[index] as any;
+                                        currentDay.routeDetails.stops.splice(stopIndex, 1);
+                                        setData({ ...data, itinerary: newItinerary });
+                                      }}
+                                      className="text-xs text-red-600 hover:text-red-800 flex items-center gap-1"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                      {t.admin.removeRouteStop}
+                                    </button>
+                                  </div>
+                                  <div className="grid sm:grid-cols-2 gap-3">
+                                    <div>
+                                      <label className="block text-xs text-gray-600 mb-1">{t.admin.routeStopNameEn}</label>
+                                      <input
+                                        type="text"
+                                        value={stop.nameEn || ''}
+                                        onChange={(e) => {
+                                          const newItinerary = [...data.itinerary];
+                                          const currentDay = newItinerary[index] as any;
+                                          currentDay.routeDetails.stops[stopIndex].nameEn = e.target.value;
+                                          setData({ ...data, itinerary: newItinerary });
+                                        }}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs text-gray-600 mb-1">{t.admin.routeStopNameZh}</label>
+                                      <input
+                                        type="text"
+                                        value={stop.nameZh || ''}
+                                        onChange={(e) => {
+                                          const newItinerary = [...data.itinerary];
+                                          const currentDay = newItinerary[index] as any;
+                                          currentDay.routeDetails.stops[stopIndex].nameZh = e.target.value;
+                                          setData({ ...data, itinerary: newItinerary });
+                                        }}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs text-gray-600 mb-1">{t.admin.routeStopAddress}</label>
+                                      <input
+                                        type="text"
+                                        value={stop.address || ''}
+                                        onChange={(e) => {
+                                          const newItinerary = [...data.itinerary];
+                                          const currentDay = newItinerary[index] as any;
+                                          currentDay.routeDetails.stops[stopIndex].address = e.target.value;
+                                          setData({ ...data, itinerary: newItinerary });
+                                        }}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs text-gray-600 mb-1">{t.admin.routeStopUrl}</label>
+                                      <input
+                                        type="url"
+                                        value={stop.url || ''}
+                                        onChange={(e) => {
+                                          const newItinerary = [...data.itinerary];
+                                          const currentDay = newItinerary[index] as any;
+                                          currentDay.routeDetails.stops[stopIndex].url = e.target.value;
+                                          setData({ ...data, itinerary: newItinerary });
+                                        }}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                        placeholder="https://maps.google.com/..."
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs text-gray-600 mb-1">{t.admin.routeStopDistance}</label>
+                                      <input
+                                        type="number"
+                                        step="0.1"
+                                        value={stop.distance || ''}
+                                        onChange={(e) => {
+                                          const newItinerary = [...data.itinerary];
+                                          const currentDay = newItinerary[index] as any;
+                                          currentDay.routeDetails.stops[stopIndex].distance = parseFloat(e.target.value) || 0;
+                                          setData({ ...data, itinerary: newItinerary });
+                                        }}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs text-gray-600 mb-1">{t.admin.routeStopTags}</label>
+                                      <div className="space-y-2">
+                                        {/* Existing Tags */}
+                                        {(stop.tags || []).map((tag: string, tagIndex: number) => (
+                                          <div key={tagIndex} className="flex items-center gap-2">
+                                            <input
+                                              type="text"
+                                              value={tag}
+                                              onChange={(e) => {
+                                                const newItinerary = [...data.itinerary];
+                                                const currentDay = newItinerary[index] as any;
+                                                const newTags = [...(currentDay.routeDetails.stops[stopIndex].tags || [])];
+                                                newTags[tagIndex] = e.target.value;
+                                                currentDay.routeDetails.stops[stopIndex].tags = newTags;
+                                                setData({ ...data, itinerary: newItinerary });
+                                              }}
+                                              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                              placeholder="Tag name"
+                                            />
+                                            <button
+                                              onClick={() => {
+                                                const newItinerary = [...data.itinerary];
+                                                const currentDay = newItinerary[index] as any;
+                                                const newTags = [...(currentDay.routeDetails.stops[stopIndex].tags || [])];
+                                                newTags.splice(tagIndex, 1);
+                                                currentDay.routeDetails.stops[stopIndex].tags = newTags;
+                                                setData({ ...data, itinerary: newItinerary });
+                                              }}
+                                              className="text-red-600 hover:text-red-800 p-2"
+                                              type="button"
+                                            >
+                                              <X className="w-4 h-4" />
+                                            </button>
+                                          </div>
+                                        ))}
+                                        
+                                        {/* Add Tag Button */}
+                                        <button
+                                          onClick={() => {
+                                            const newItinerary = [...data.itinerary];
+                                            const currentDay = newItinerary[index] as any;
+                                            const newTags = [...(currentDay.routeDetails.stops[stopIndex].tags || [])];
+                                            newTags.push('');
+                                            currentDay.routeDetails.stops[stopIndex].tags = newTags;
+                                            setData({ ...data, itinerary: newItinerary });
+                                          }}
+                                          className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900 px-2 py-1 border border-gray-300 rounded-lg hover:bg-gray-50"
+                                          type="button"
+                                        >
+                                          <Plus className="w-3 h-3" />
+                                          Add Tag
+                                        </button>
+                                        
+                                        {(stop.tags || []).length === 0 && (
+                                          <p className="text-xs text-gray-500">Click "Add Tag" to add tags (e.g., Food, Toilet, Scenery, Rest, Hotel, Lunch)</p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          
+                          {/* Add Stop Button */}
+                          <button
+                            onClick={() => {
+                              const newItinerary = [...data.itinerary];
+                              const currentDay = newItinerary[index] as any;
+                              if (!currentDay.routeDetails) {
+                                currentDay.routeDetails = { enabled: true, stops: [] };
+                              }
+                              if (!currentDay.routeDetails.stops) {
+                                currentDay.routeDetails.stops = [];
+                              }
+                              currentDay.routeDetails.stops.push({
+                                nameEn: '',
+                                nameZh: '',
+                                address: '',
+                                url: '',
+                                distance: 0,
+                                tags: [],
+                              });
+                              setData({ ...data, itinerary: newItinerary });
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
+                          >
+                            <Plus className="w-4 h-4" />
+                            {t.admin.addRouteStop}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {t.itinerary.highlights}
-                      </label>
-                      <div className="space-y-3">
-                        {(() => {
-                          // Merge highlights and highlightsZh into a single array
-                          const highlightsEn = day.highlights || [];
-                          const highlightsZh = (day as any).highlightsZh || [];
-                          const maxLength = Math.max(highlightsEn.length, highlightsZh.length);
-                          const mergedHighlights = Array.from({ length: maxLength }, (_, i) => {
-                            const en = typeof highlightsEn[i] === 'string' ? highlightsEn[i] : ((highlightsEn[i] as any)?.en || '');
-                            const zh = highlightsZh[i] || ((highlightsEn[i] as any)?.zh || '');
-                            return { en, zh };
-                          });
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                          {t.itinerary.highlights}
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={(day as any).highlightsEnabled !== false}
+                            onChange={(e) => {
+                              const newItinerary = [...data.itinerary];
+                              const currentDay = newItinerary[index] as any;
+                              currentDay.highlightsEnabled = e.target.checked;
+                              setData({ ...data, itinerary: newItinerary });
+                            }}
+                            className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900"
+                          />
+                          <span className="text-sm text-gray-700">
+                            {(day as any).highlightsEnabled !== false ? t.admin.highlightsEnabled : t.admin.highlightsDisabled}
+                          </span>
+                        </label>
+                      </div>
+                      {(day as any).highlightsEnabled !== false && (
+                        <div className="space-y-3">
+                          {(() => {
+                            // Merge highlights and highlightsZh into a single array
+                            const highlightsEn = day.highlights || [];
+                            const highlightsZh = (day as any).highlightsZh || [];
+                            const maxLength = Math.max(highlightsEn.length, highlightsZh.length);
+                            const mergedHighlights = Array.from({ length: maxLength }, (_, i) => {
+                              const en = typeof highlightsEn[i] === 'string' ? highlightsEn[i] : ((highlightsEn[i] as any)?.en || '');
+                              const zh = highlightsZh[i] || ((highlightsEn[i] as any)?.zh || '');
+                              return { en, zh };
+                            });
 
-                          return mergedHighlights.map((highlight, highlightIndex) => {
+                            return mergedHighlights.map((highlight, highlightIndex) => {
                             const isDragging = draggedHighlightIndex?.dayIndex === index && draggedHighlightIndex?.highlightIndex === highlightIndex;
                             const highlightUrls = (day as any).highlightUrls || [];
                             
@@ -1483,36 +1997,38 @@ export default function AdminPage() {
                             );
                           });
                         })()}
-                        <button
-                          onClick={() => {
-                            const newItinerary = [...data.itinerary];
-                            const currentDay = newItinerary[index] as any;
-                            const highlightsEn = currentDay.highlights || [];
-                            const highlightsZh = currentDay.highlightsZh || [];
-                            const highlightUrls = currentDay.highlightUrls || [];
-                            const newHighlightsEn = [...highlightsEn, ''];
-                            const newHighlightsZh = [...highlightsZh, ''];
-                            const newHighlightUrls = [...highlightUrls, ''];
-                            
-                            newItinerary[index] = {
-                              ...currentDay,
-                              highlights: newHighlightsEn,
-                              highlightsZh: newHighlightsZh,
-                              highlightUrls: newHighlightUrls,
-                            };
-                            setData({ ...data, itinerary: newItinerary });
-                          }}
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg"
-                        >
-                          <Plus className="w-4 h-4" />
-                          {t.admin.addHighlight}
-                        </button>
-                      </div>
+                          <button
+                            onClick={() => {
+                              const newItinerary = [...data.itinerary];
+                              const currentDay = newItinerary[index] as any;
+                              const highlightsEn = currentDay.highlights || [];
+                              const highlightsZh = currentDay.highlightsZh || [];
+                              const highlightUrls = currentDay.highlightUrls || [];
+                              const newHighlightsEn = [...highlightsEn, ''];
+                              const newHighlightsZh = [...highlightsZh, ''];
+                              const newHighlightUrls = [...highlightUrls, ''];
+                              
+                              newItinerary[index] = {
+                                ...currentDay,
+                                highlights: newHighlightsEn,
+                                highlightsZh: newHighlightsZh,
+                                highlightUrls: newHighlightUrls,
+                              };
+                              setData({ ...data, itinerary: newItinerary });
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg"
+                          >
+                            <Plus className="w-4 h-4" />
+                            {t.admin.addHighlight}
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {t.admin.dailyHighlightPhotos}
-                      </label>
+                    {(day as any).highlightsEnabled !== false && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {t.admin.dailyHighlightPhotos}
+                        </label>
                       {/* Bulk Upload */}
                       <div className="mb-4">
                         <label className="block text-xs text-gray-600 mb-2">
@@ -1695,10 +2211,11 @@ export default function AdminPage() {
                           </button>
                         )}
                       </div>
-                      <p className="mt-2 text-xs text-gray-500">
-                        Upload images (max 5MB each, automatically compressed) or paste image URLs. Add 3-5 photos for daily highlights.
-                      </p>
-                    </div>
+                        <p className="mt-2 text-xs text-gray-500">
+                          Upload images (max 5MB each, automatically compressed) or paste image URLs. Add 3-5 photos for daily highlights.
+                        </p>
+                      </div>
+                    )}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         {t.admin.notesLabel} (English)

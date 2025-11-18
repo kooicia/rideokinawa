@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Clock, MapPin, Utensils, Hotel, Calendar, Route, TrendingUp, Plane, Bike, Map, Home, PlaneTakeoff, PlaneLanding, X, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import { Clock, MapPin, Utensils, Hotel, Calendar, Route, TrendingUp, Plane, Bike, Map, Home, PlaneTakeoff, PlaneLanding, X, ChevronLeft, ChevronRight, ExternalLink, Coffee, Camera, Users } from "lucide-react";
 import tourDataStatic from "@/data/tour-data.json";
 import { useLanguage } from "@/contexts/LanguageContext";
 import RouteMap from "@/components/RouteMap";
@@ -551,8 +551,142 @@ export default function ItineraryPage() {
                   </div>
                 )}
 
+                {/* Route Details */}
+                {(day as any).routeDetails?.enabled && ((day as any).routeDetails?.stops || []).length > 0 && (
+                  <div className="mb-4 sm:mb-6" suppressHydrationWarning>
+                    <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
+                      <Route className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                      {t.itinerary.routeDetails}
+                    </h3>
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden" suppressHydrationWarning>
+                      <div className="divide-y divide-gray-200" suppressHydrationWarning>
+                        {((day as any).routeDetails.stops || []).map((stop: any, stopIndex: number) => {
+                          const stopName = language === 'zh-TW' 
+                            ? (stop.nameZh || stop.nameEn)
+                            : (stop.nameEn || stop.nameZh);
+                          const tags = stop.tags || [];
+                          
+                          // Tag icon mapping
+                          const getTagIcon = (tag: string) => {
+                            const tagLower = tag.toLowerCase();
+                            if (tagLower.includes('lunch') || tagLower.includes('午餐')) return Utensils;
+                            if (tagLower.includes('food')) return Utensils;
+                            if (tagLower.includes('toilet') || tagLower.includes('restroom')) return Users;
+                            if (tagLower.includes('scenery') || tagLower.includes('view')) return Camera;
+                            if (tagLower.includes('rest') || tagLower.includes('break')) return Coffee;
+                            if (tagLower.includes('hotel')) return Hotel;
+                            return MapPin;
+                          };
+                          
+                          // Tag color mapping
+                          const getTagColor = (tag: string): string => {
+                            const tagLower = tag.toLowerCase().trim();
+                            if (tagLower.includes('lunch') || tagLower === '午餐') {
+                              return 'bg-orange-100 text-orange-700 border border-orange-200';
+                            }
+                            return 'bg-gray-100 text-gray-700';
+                          };
+                          
+                          // Tag translation mapping
+                          const translateTag = (tag: string): string => {
+                            const tagLower = tag.toLowerCase().trim();
+                            
+                            // Check for exact matches first (Lunch should be checked before Food)
+                            if (tagLower === 'lunch' || tagLower === '午餐') return language === 'zh-TW' ? t.itinerary.tagLunch : 'Lunch';
+                            if (tagLower === 'food' || tagLower === '餐點') return language === 'zh-TW' ? t.itinerary.tagFood : 'Food';
+                            if (tagLower === 'toilet' || tagLower === '廁所' || tagLower === 'restroom') return language === 'zh-TW' ? t.itinerary.tagToilet : 'Toilet';
+                            if (tagLower === 'scenery' || tagLower === '風景' || tagLower === 'view') return language === 'zh-TW' ? t.itinerary.tagScenery : 'Scenery';
+                            if (tagLower === 'rest' || tagLower === '休息' || tagLower === 'break') return language === 'zh-TW' ? t.itinerary.tagRest : 'Rest';
+                            if (tagLower === 'hotel' || tagLower === '飯店' || tagLower === '酒店') return language === 'zh-TW' ? t.itinerary.tagHotel : 'Hotel';
+                            
+                            // Check for partial matches (Lunch should be checked before Food)
+                            if (tagLower.includes('lunch') || tagLower.includes('午餐')) return language === 'zh-TW' ? t.itinerary.tagLunch : 'Lunch';
+                            if (tagLower.includes('food') || tagLower.includes('餐點')) return language === 'zh-TW' ? t.itinerary.tagFood : 'Food';
+                            if (tagLower.includes('toilet') || tagLower.includes('廁所') || tagLower.includes('restroom')) return language === 'zh-TW' ? t.itinerary.tagToilet : 'Toilet';
+                            if (tagLower.includes('scenery') || tagLower.includes('風景') || tagLower.includes('view')) return language === 'zh-TW' ? t.itinerary.tagScenery : 'Scenery';
+                            if (tagLower.includes('rest') || tagLower.includes('休息') || tagLower.includes('break')) return language === 'zh-TW' ? t.itinerary.tagRest : 'Rest';
+                            if (tagLower.includes('hotel') || tagLower.includes('飯店') || tagLower.includes('酒店')) return language === 'zh-TW' ? t.itinerary.tagHotel : 'Hotel';
+                            
+                            // Return original if no match
+                            return tag;
+                          };
+                          
+                          return (
+                            <div key={stopIndex} className="p-4 sm:p-5 hover:bg-gray-50 transition-colors" suppressHydrationWarning>
+                              <div className="flex items-start gap-3 sm:gap-4" suppressHydrationWarning>
+                                {/* Stop Number */}
+                                <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 text-white rounded-lg flex items-center justify-center font-semibold text-sm sm:text-base" suppressHydrationWarning>
+                                  {stopIndex + 1}
+                                </div>
+                                
+                                {/* Stop Content */}
+                                <div className="flex-1 min-w-0" suppressHydrationWarning>
+                                  {/* Stop Name */}
+                                  <div className="mb-2" suppressHydrationWarning>
+                                    <h4 className="font-semibold text-sm sm:text-base text-gray-900 mb-1" suppressHydrationWarning>
+                                      {stopName}
+                                    </h4>
+                                    
+                                    {/* Address or URL */}
+                                    {stop.url ? (
+                                      <a
+                                        href={stop.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                                      >
+                                        {stop.address || stop.url}
+                                        <ExternalLink className="w-3 h-3" />
+                                      </a>
+                                    ) : stop.address ? (
+                                      <p className="text-xs sm:text-sm text-gray-600" suppressHydrationWarning>
+                                        {stop.address}
+                                      </p>
+                                    ) : null}
+                                  </div>
+                                  
+                                  {/* Tags */}
+                                  {tags.length > 0 && (
+                                    <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2" suppressHydrationWarning>
+                                      {tags.map((tag: string, tagIndex: number) => {
+                                        const TagIcon = getTagIcon(tag);
+                                        const translatedTag = translateTag(tag);
+                                        const tagColor = getTagColor(tag);
+                                        return (
+                                          <span
+                                            key={tagIndex}
+                                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs ${tagColor}`}
+                                            suppressHydrationWarning
+                                          >
+                                            <TagIcon className="w-3 h-3" />
+                                            {translatedTag}
+                                          </span>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {/* Distance */}
+                                {stop.distance >= 0 && (
+                                  <div className="flex-shrink-0 text-right" suppressHydrationWarning>
+                                    <div className="text-xs sm:text-sm font-medium text-gray-900" suppressHydrationWarning>
+                                      {stop.distance === 0 ? '0 km' : `${stop.distance.toFixed(1)} km`}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Highlights */}
-                {((day.highlights && day.highlights.length > 0) || ((day as any).highlightsZh && (day as any).highlightsZh.length > 0)) && (
+                {((day as any).highlightsEnabled !== false && 
+                  ((day.highlights && day.highlights.length > 0) || ((day as any).highlightsZh && (day as any).highlightsZh.length > 0))) && (
                   <div className="mb-4 sm:mb-6" suppressHydrationWarning>
                     <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-2 sm:mb-3">{t.itinerary.highlights}</h3>
                     <ul className="space-y-1.5 sm:space-y-2" suppressHydrationWarning>
