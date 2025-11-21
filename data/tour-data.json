@@ -149673,88 +149673,241 @@
     {
       "category": "Safety",
       "items": [
-        "Always wear a helmet while cycling",
-        "Follow traffic rules and signals",
-        "Stay hydrated - drink water every 30 minutes",
-        "Use hand signals when turning or stopping",
-        "Keep emergency contact numbers accessible"
+        {
+          "en": "Always wear a helmet while cycling",
+          "zh": "騎車時務必配戴安全帽"
+        },
+        {
+          "en": "Follow traffic rules and signals",
+          "zh": "遵守交通規則和號誌"
+        },
+        {
+          "en": "Stay hydrated - drink water every 30 minutes",
+          "zh": "保持水分補充 - 每30分鐘喝水"
+        },
+        {
+          "en": "Use hand signals when turning or stopping",
+          "zh": "轉彎或停車時使用手勢"
+        },
+        {
+          "en": "Keep emergency contact numbers accessible",
+          "zh": "保持緊急聯絡電話可及"
+        }
       ]
     },
     {
       "category": "Health",
       "items": [
-        "Bring sunscreen (SPF 50+) and reapply every 2 hours",
-        "Pack insect repellent for tropical areas",
-        "Stay hydrated - minimum 2 liters water per day",
-        "Inform guides of any medical conditions",
-        "Pack personal medications"
+        {
+          "en": "Bring sunscreen (SPF 50+) and reapply every 2 hours",
+          "zh": "攜帶防曬乳（SPF 50+）並每2小時補擦"
+        },
+        {
+          "en": "Pack insect repellent for tropical areas",
+          "zh": "為熱帶地區準備防蚊液"
+        },
+        {
+          "en": "Stay hydrated - minimum 2 liters water per day",
+          "zh": "保持水分補充 - 每天至少2公升水"
+        },
+        {
+          "en": "Inform guides of any medical conditions",
+          "zh": "告知導遊任何醫療狀況"
+        },
+        {
+          "en": "Pack personal medications",
+          "zh": "攜帶個人藥物"
+        }
       ]
     },
     {
       "category": "Bike & Equipment",
       "items": [
-        "Daily bike check before departure",
-        "Carry spare tube and basic tools",
-        "Keep bike locked when not in use",
-        "Report any mechanical issues immediately",
-        "Bike fitting session on Day 1"
+        {
+          "en": "Daily bike check before departure",
+          "zh": "出發前每日檢查單車"
+        },
+        {
+          "en": "Carry spare tube and basic tools",
+          "zh": "攜帶備用內胎和基本工具"
+        },
+        {
+          "en": "Keep bike locked when not in use",
+          "zh": "不使用時鎖好單車"
+        },
+        {
+          "en": "Report any mechanical issues immediately",
+          "zh": "立即回報任何機械問題"
+        },
+        {
+          "en": "Bike fitting session on Day 1",
+          "zh": "第1天的單車調整課程"
+        }
       ]
     },
     {
       "category": "Weather",
       "items": [
-        "Check daily weather forecast",
-        "Pack rain gear (lightweight jacket)",
-        "Temperatures range from 18-28°C (65-82°F)",
-        "High humidity - moisture-wicking clothing recommended",
-        "Afternoon showers possible - quick-dry clothing"
+        {
+          "en": "Check daily weather forecast",
+          "zh": "查看每日天氣預報"
+        },
+        {
+          "en": "Pack rain gear (lightweight jacket)",
+          "zh": "準備雨具（輕量雨衣）"
+        },
+        {
+          "en": "Temperatures range from 18-28°C (65-82°F)",
+          "zh": "溫度範圍18-28°C（65-82°F）"
+        },
+        {
+          "en": "High humidity - moisture-wicking clothing recommended",
+          "zh": "高濕度 - 建議穿著排汗衣物"
+        },
+        {
+          "en": "Afternoon showers possible - quick-dry clothing",
+          "zh": "午後可能有陣雨 - 建議快乾衣物"
+        }
       ]
     },
     {
       "category": "Cultural",
       "items": [
-        "Respect local customs and traditions",
-        "Remove shoes when entering temples or homes",
-        "Learn basic Japanese phrases (hello, thank you)",
-        "Be mindful of photography restrictions",
-        "Tipping is not customary in Japan"
+        {
+          "en": "Respect local customs and traditions",
+          "zh": "尊重當地習俗和傳統"
+        },
+        {
+          "en": "Remove shoes when entering temples or homes",
+          "zh": "進入寺廟或住家時脫鞋"
+        },
+        {
+          "en": "Learn basic Japanese phrases (hello, thank you)",
+          "zh": "學習基本日語短語（你好、謝謝）"
+        },
+        {
+          "en": "Be mindful of photography restrictions",
+          "zh": "注意攝影限制"
+        },
+        {
+          "en": "Tipping is not customary in Japan",
+          "zh": "日本不習慣給小費"
+        }
       ]
     }
   ],
   "packingList": {
     "essentials": [
-      "Cycling helmet (mandatory)",
-      "Cycling shorts (2-3 pairs)",
-      "Moisture-wicking jerseys (3-4)",
-      "Cycling shoes",
-      "Water bottles (2 minimum)",
-      "Bike repair kit (provided but personal preference items welcome)"
+      {
+        "en": "Cycling helmet (mandatory)",
+        "zh": "單車安全帽（必備）"
+      },
+      {
+        "en": "Cycling shorts (2-3 pairs)",
+        "zh": "單車短褲（2-3件）"
+      },
+      {
+        "en": "Moisture-wicking jerseys (3-4)",
+        "zh": "排汗衫（3-4件）"
+      },
+      {
+        "en": "Cycling shoes",
+        "zh": "單車鞋"
+      },
+      {
+        "en": "Water bottles (2 minimum)",
+        "zh": "水壺（至少2個）"
+      },
+      {
+        "en": "Bike repair kit (provided but personal preference items welcome)",
+        "zh": "單車維修工具組（提供，但歡迎自備個人偏好物品）"
+      }
     ],
     "clothing": [
-      "Lightweight rain jacket",
-      "Arm warmers/leg warmers",
-      "Casual clothes for evenings (2-3 outfits)",
-      "Comfortable walking shoes",
-      "Sandals/flip-flops",
-      "Swimwear"
+      {
+        "en": "Lightweight rain jacket",
+        "zh": "輕量雨衣"
+      },
+      {
+        "en": "Arm warmers/leg warmers",
+        "zh": "袖套/腿套"
+      },
+      {
+        "en": "Casual clothes for evenings (2-3 outfits)",
+        "zh": "晚間休閒服裝（2-3套）"
+      },
+      {
+        "en": "Comfortable walking shoes",
+        "zh": "舒適的步行鞋"
+      },
+      {
+        "en": "Sandals/flip-flops",
+        "zh": "涼鞋/拖鞋"
+      },
+      {
+        "en": "Swimwear",
+        "zh": "泳衣"
+      }
     ],
     "accessories": [
-      "Sunglasses with UV protection",
-      "Cycling gloves",
-      "Sun hat or cap",
-      "Sunscreen (SPF 50+)",
-      "Insect repellent",
-      "Personal toiletries",
-      "First aid kit (basic)",
-      "Camera or smartphone",
-      "Portable charger"
+      {
+        "en": "Sunglasses with UV protection",
+        "zh": "防紫外線太陽眼鏡"
+      },
+      {
+        "en": "Cycling gloves",
+        "zh": "單車手套"
+      },
+      {
+        "en": "Sun hat or cap",
+        "zh": "遮陽帽或帽子"
+      },
+      {
+        "en": "Sunscreen (SPF 50+)",
+        "zh": "防曬乳（SPF 50+）"
+      },
+      {
+        "en": "Insect repellent",
+        "zh": "防蚊液"
+      },
+      {
+        "en": "Personal toiletries",
+        "zh": "個人盥洗用品"
+      },
+      {
+        "en": "First aid kit (basic)",
+        "zh": "急救包（基本）"
+      },
+      {
+        "en": "Camera or smartphone",
+        "zh": "相機或智慧型手機"
+      },
+      {
+        "en": "Portable charger",
+        "zh": "行動電源"
+      }
     ],
     "documents": [
-      "Passport (valid for 6+ months)",
-      "Travel insurance documents",
-      "Emergency contact information",
-      "Medical information card",
-      "Copy of itinerary"
+      {
+        "en": "Passport (valid for 6+ months)",
+        "zh": "護照（有效期6個月以上）"
+      },
+      {
+        "en": "Travel insurance documents",
+        "zh": "旅遊保險文件"
+      },
+      {
+        "en": "Emergency contact information",
+        "zh": "緊急聯絡資訊"
+      },
+      {
+        "en": "Medical information card",
+        "zh": "醫療資訊卡"
+      },
+      {
+        "en": "Copy of itinerary",
+        "zh": "行程表副本"
+      }
     ]
   },
   "weather": {

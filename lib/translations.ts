@@ -88,6 +88,31 @@ export interface Translations {
     currentWeekForecast: string;
     limitedRangeTitle: string;
     limitedRangeDescription: string;
+    clearSky: string;
+    mainlyClear: string;
+    partlyCloudy: string;
+    overcast: string;
+    foggy: string;
+    depositingRimeFog: string;
+    lightDrizzle: string;
+    moderateDrizzle: string;
+    denseDrizzle: string;
+    lightFreezingDrizzle: string;
+    denseFreezingDrizzle: string;
+    slightRain: string;
+    moderateRain: string;
+    heavyRain: string;
+    slightSnow: string;
+    moderateSnow: string;
+    heavySnow: string;
+    slightRainShowers: string;
+    moderateRainShowers: string;
+    violentRainShowers: string;
+    slightSnowShowers: string;
+    heavySnowShowers: string;
+    thunderstorm: string;
+    thunderstormWithHail: string;
+    unknown: string;
   };
   packing: {
     title: string;
@@ -284,6 +309,31 @@ export const translations: Record<Language, Translations> = {
       currentWeekForecast: 'Below is the current weather forecast for this week:',
       limitedRangeTitle: 'Partial Forecast Shown',
       limitedRangeDescription: 'Forecast data is currently available only through {date}. Dates beyond this range have not been published yet.',
+      clearSky: 'Clear sky',
+      mainlyClear: 'Mainly clear',
+      partlyCloudy: 'Partly cloudy',
+      overcast: 'Overcast',
+      foggy: 'Foggy',
+      depositingRimeFog: 'Depositing rime fog',
+      lightDrizzle: 'Light drizzle',
+      moderateDrizzle: 'Moderate drizzle',
+      denseDrizzle: 'Dense drizzle',
+      lightFreezingDrizzle: 'Light freezing drizzle',
+      denseFreezingDrizzle: 'Dense freezing drizzle',
+      slightRain: 'Slight rain',
+      moderateRain: 'Moderate rain',
+      heavyRain: 'Heavy rain',
+      slightSnow: 'Slight snow',
+      moderateSnow: 'Moderate snow',
+      heavySnow: 'Heavy snow',
+      slightRainShowers: 'Slight rain showers',
+      moderateRainShowers: 'Moderate rain showers',
+      violentRainShowers: 'Violent rain showers',
+      slightSnowShowers: 'Slight snow showers',
+      heavySnowShowers: 'Heavy snow showers',
+      thunderstorm: 'Thunderstorm',
+      thunderstormWithHail: 'Thunderstorm with hail',
+      unknown: 'Unknown',
     },
     packing: {
       title: 'Packing Recommendations',
@@ -479,6 +529,31 @@ export const translations: Record<Language, Translations> = {
       currentWeekForecast: '目前改為顯示本週預報。',
       limitedRangeTitle: '僅顯示部分天氣預報',
       limitedRangeDescription: '目前僅提供至 {date} 的預報，超出範圍的日期尚未發布。',
+      clearSky: '晴朗',
+      mainlyClear: '大致晴朗',
+      partlyCloudy: '多雲',
+      overcast: '陰天',
+      foggy: '有霧',
+      depositingRimeFog: '結霜霧',
+      lightDrizzle: '小雨',
+      moderateDrizzle: '中雨',
+      denseDrizzle: '大雨',
+      lightFreezingDrizzle: '輕微凍雨',
+      denseFreezingDrizzle: '強凍雨',
+      slightRain: '小雨',
+      moderateRain: '中雨',
+      heavyRain: '大雨',
+      slightSnow: '小雪',
+      moderateSnow: '中雪',
+      heavySnow: '大雪',
+      slightRainShowers: '小陣雨',
+      moderateRainShowers: '中陣雨',
+      violentRainShowers: '強陣雨',
+      slightSnowShowers: '小陣雪',
+      heavySnowShowers: '強陣雪',
+      thunderstorm: '雷暴',
+      thunderstormWithHail: '雷暴帶冰雹',
+      unknown: '未知',
     },
     packing: {
       title: '打包建議',

@@ -25,31 +25,32 @@ interface DayWeather {
   windSpeed: number;
 }
 
-const weatherCodes: { [key: number]: { icon: any; label: string } } = {
-  0: { icon: Sun, label: "Clear sky" },
-  1: { icon: Cloud, label: "Mainly clear" },
-  2: { icon: Cloud, label: "Partly cloudy" },
-  3: { icon: Cloud, label: "Overcast" },
-  45: { icon: Cloud, label: "Foggy" },
-  48: { icon: Cloud, label: "Depositing rime fog" },
-  51: { icon: CloudRain, label: "Light drizzle" },
-  53: { icon: CloudRain, label: "Moderate drizzle" },
-  55: { icon: CloudRain, label: "Dense drizzle" },
-  56: { icon: CloudRain, label: "Light freezing drizzle" },
-  57: { icon: CloudRain, label: "Dense freezing drizzle" },
-  61: { icon: CloudRain, label: "Slight rain" },
-  63: { icon: CloudRain, label: "Moderate rain" },
-  65: { icon: CloudRain, label: "Heavy rain" },
-  71: { icon: CloudRain, label: "Slight snow" },
-  73: { icon: CloudRain, label: "Moderate snow" },
-  75: { icon: CloudRain, label: "Heavy snow" },
-  80: { icon: CloudRain, label: "Slight rain showers" },
-  81: { icon: CloudRain, label: "Moderate rain showers" },
-  82: { icon: CloudRain, label: "Violent rain showers" },
-  85: { icon: CloudRain, label: "Slight snow showers" },
-  86: { icon: CloudRain, label: "Heavy snow showers" },
-  95: { icon: CloudRain, label: "Thunderstorm" },
-  96: { icon: CloudRain, label: "Thunderstorm with hail" },
+// Weather codes will be translated dynamically based on language
+const weatherCodes: { [key: number]: { icon: any; code: string } } = {
+  0: { icon: Sun, code: "clearSky" },
+  1: { icon: Cloud, code: "mainlyClear" },
+  2: { icon: Cloud, code: "partlyCloudy" },
+  3: { icon: Cloud, code: "overcast" },
+  45: { icon: Cloud, code: "foggy" },
+  48: { icon: Cloud, code: "depositingRimeFog" },
+  51: { icon: CloudRain, code: "lightDrizzle" },
+  53: { icon: CloudRain, code: "moderateDrizzle" },
+  55: { icon: CloudRain, code: "denseDrizzle" },
+  56: { icon: CloudRain, code: "lightFreezingDrizzle" },
+  57: { icon: CloudRain, code: "denseFreezingDrizzle" },
+  61: { icon: CloudRain, code: "slightRain" },
+  63: { icon: CloudRain, code: "moderateRain" },
+  65: { icon: CloudRain, code: "heavyRain" },
+  71: { icon: CloudRain, code: "slightSnow" },
+  73: { icon: CloudRain, code: "moderateSnow" },
+  75: { icon: CloudRain, code: "heavySnow" },
+  80: { icon: CloudRain, code: "slightRainShowers" },
+  81: { icon: CloudRain, code: "moderateRainShowers" },
+  82: { icon: CloudRain, code: "violentRainShowers" },
+  85: { icon: CloudRain, code: "slightSnowShowers" },
+  86: { icon: CloudRain, code: "heavySnowShowers" },
+  95: { icon: CloudRain, code: "thunderstorm" },
+  96: { icon: CloudRain, code: "thunderstormWithHail" },
 };
 
 export default function WeatherPage() {
@@ -58,7 +59,7 @@ export default function WeatherPage() {
   const [error, setError] = useState<string | null>(null);
   const [showingCurrentWeek, setShowingCurrentWeek] = useState(false);
   const [forecastLimitedEndDate, setForecastLimitedEndDate] = useState<string | null>(null);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const { weather: weatherConfig, itinerary } = tourData;
 
@@ -228,7 +229,8 @@ export default function WeatherPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    const locale = language === 'zh-TW' ? 'zh-TW' : 'en-US';
+    return date.toLocaleDateString(locale, {
       weekday: "long",
       month: "long",
       day: "numeric",
@@ -236,7 +238,9 @@ export default function WeatherPage() {
   };
 
   const getWeatherInfo = (code: number) => {
-    return weatherCodes[code] || { icon: Cloud, label: "Unknown" };
+    const weatherCode = weatherCodes[code] || { icon: Cloud, code: "unknown" };
+    const label = (t.weather as any)[weatherCode.code] || (t.weather as any).unknown || "Unknown";
+    return { icon: weatherCode.icon, label };
   };
 
   return (
