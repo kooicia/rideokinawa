@@ -21931,54 +21931,62 @@
         "enabled": true,
         "stops": [
           {
-            "nameEn": "Umisora Park",
-            "nameZh": "波之上海空公園",
+            "nameEn": "Okinawa Ringyo - Maejima 2nd Branch Bike Shop",
+            "nameZh": "沖縄輪業前島2号館",
             "address": "",
-            "url": "https://maps.app.goo.gl/PEcHJWMSCLacqKEX8",
+            "url": "https://maps.app.goo.gl/XcQXcWVdoKDXT5nq7",
             "distance": 0,
-            "tags": [
-              "Scenery"
-            ]
+            "tags": []
           },
           {
             "nameEn": "Naminoue Shrine",
-            "nameZh": "波上宮",
+            "nameZh": "波之上海空公園",
             "address": "",
             "url": "https://maps.app.goo.gl/qha62xoGBToXqDQW6",
-            "distance": 1.2,
+            "distance": 1.7,
             "tags": [
               "Scenery"
             ]
           },
           {
             "nameEn": "Tomarin Park",
-            "nameZh": "泊碼頭公園 / トマリン港 (Tomarin 港)",
+            "nameZh": "波上宮",
             "address": "",
             "url": "https://maps.app.goo.gl/YksCmTkrqAgeGZrv5",
-            "distance": 3.1,
+            "distance": 4,
             "tags": [
               "Scenery"
             ]
           },
           {
             "nameEn": "Ginowan Marina and Park",
-            "nameZh": "宜野灣碼頭公園",
+            "nameZh": "泊碼頭公園 / トマリン港 (Tomarin 港)",
             "address": "",
             "url": "https://maps.app.goo.gl/C2At6rniP3HiF7o38",
-            "distance": 11.1,
+            "distance": 12,
             "tags": [
               "Scenery"
             ]
           },
           {
             "nameEn": "Blue Seal Chatan",
-            "nameZh": "藍封印（Blue Seal）北谷店",
+            "nameZh": "宜野灣碼頭公園",
             "address": "",
             "url": "https://maps.app.goo.gl/jnf9ZKJLgBjV2Rjo7",
-            "distance": 17.3,
+            "distance": 19.3,
             "tags": [
               "Food",
               "Toilet"
+            ]
+          },
+          {
+            "nameEn": "Uminchu wharf",
+            "nameZh": "藍封印（Blue Seal）北谷店",
+            "address": "",
+            "url": "https://maps.app.goo.gl/hcbSRzR9JT2pzzsK8",
+            "distance": 20,
+            "tags": [
+              "Scenery"
             ]
           },
           {
@@ -21986,7 +21994,7 @@
             "nameZh": "羅森恩納月亮海灘",
             "address": "",
             "url": "https://maps.app.goo.gl/wRTsTzC556V3ANNj9",
-            "distance": 36.7,
+            "distance": 38.6,
             "tags": [
               "Food",
               "Toilet"
@@ -21997,20 +22005,30 @@
             "nameZh": "譚茶前濱之日公園",
             "address": "",
             "url": "https://maps.app.goo.gl/wBtXitLPNeAS1xBK6",
-            "distance": 39.4,
+            "distance": 41.3,
             "tags": [
               "Scenery"
             ]
           },
           {
-            "nameEn": "Onna Kyoudou Baiten",
-            "nameZh": "恩納共同販店 / 恩納公設市場",
+            "nameEn": "MANZA Onna Kyoudou Baiten",
+            "nameZh": "万座毛",
             "address": "",
             "url": "https://maps.app.goo.gl/sPPVcXfojZ9CAuCd6",
-            "distance": 44.3,
+            "distance": 47.2,
             "tags": [
               "Food",
               "Lunch"
+            ]
+          },
+          {
+            "nameEn": "Nago Citizen Beach",
+            "nameZh": "名護市民ビーチ",
+            "address": "",
+            "url": "https://maps.app.goo.gl/pjrJZaDDTuURBTxK7",
+            "distance": 61.2,
+            "tags": [
+              "Scenery"
             ]
           },
           {
@@ -22018,7 +22036,7 @@
             "nameZh": "沖繩湯賀夫客棧 / 沖繩Yugaf Inn",
             "address": "",
             "url": "https://maps.app.goo.gl/adXXDEeU2L2TyvEq9",
-            "distance": 68,
+            "distance": 71.3,
             "tags": [
               "Hotel"
             ]
@@ -37245,18 +37263,7 @@
             "url": "https://maps.app.goo.gl/zhdVBZctrWXCn7bn8",
             "distance": 19.7,
             "tags": [
-              "Food",
-              "Lunch"
-            ]
-          },
-          {
-            "nameEn": "コッコ食堂",
-            "nameZh": "可可小食堂",
-            "address": "",
-            "url": "https://maps.app.goo.gl/6azXWBE9LSV64iwP7",
-            "distance": 21,
-            "tags": [
-              "Food",
+              "Toilet",
               "Lunch"
             ]
           },
@@ -37273,12 +37280,25 @@
             ]
           },
           {
-            "nameEn": "Hokutonomori",
-            "nameZh": "北之森",
+            "nameEn": "コッコ食堂",
+            "nameZh": "可可小食堂",
             "address": "",
-            "url": "https://maps.app.goo.gl/34WLDNe8j3Nvpsrp6",
-            "distance": 29.6,
-            "tags": []
+            "url": "https://maps.app.goo.gl/6azXWBE9LSV64iwP7",
+            "distance": 21,
+            "tags": [
+              "Food",
+              "Lunch"
+            ]
+          },
+          {
+            "nameEn": "Town Plaza Kanehide Nakijin Sakura Market (Dinner take out)",
+            "nameZh": "賣場 打包晚餐",
+            "address": "",
+            "url": "https://maps.app.goo.gl/446QjSLW9AxPuY7D9",
+            "distance": 31.3,
+            "tags": [
+              "Food"
+            ]
           },
           {
             "nameEn": "DRIVE IN RIKARIKA-WARUMI",
@@ -69410,7 +69430,6 @@
             "url": "https://maps.app.goo.gl/5RzdKPQjXHcgtNXR7",
             "distance": 46.3,
             "tags": [
-              "Food",
               "Lunch"
             ]
           },
@@ -106109,8 +106128,7 @@
             "tags": [
               "Food",
               "Toilet",
-              "Scenery",
-              "Rest"
+              "Scenery"
             ]
           },
           {
@@ -106143,7 +106161,6 @@
             "url": "https://maps.app.goo.gl/tmLhZRVk4y6SHAZV8",
             "distance": 37.8,
             "tags": [
-              "Food",
               "Lunch"
             ]
           },
@@ -106154,7 +106171,6 @@
             "url": "https://maps.app.goo.gl/zr564Ub5xDknYgf37",
             "distance": 37.8,
             "tags": [
-              "Food",
               "Lunch"
             ]
           },
@@ -106179,8 +106195,7 @@
             "tags": [
               "Food",
               "Toilet",
-              "Scenery",
-              "Rest"
+              "Scenery"
             ]
           },
           {
@@ -125013,7 +125028,7 @@
             ]
           },
           {
-            "nameEn": "海中道路展望台",
+            "nameEn": "Kaichu Road",
             "nameZh": "海中道路觀景台",
             "address": "",
             "url": "https://maps.app.goo.gl/MsXvgftLLHVXfJGo8",
@@ -125037,6 +125052,17 @@
             ]
           },
           {
+            "nameEn": "Uru Marche",
+            "nameZh": "Uru Marche 賣場",
+            "address": "",
+            "url": "https://maps.app.goo.gl/eggEe36be1fAqr3K6",
+            "distance": 43.4,
+            "tags": [
+              "Food",
+              "Lunch"
+            ]
+          },
+          {
             "nameEn": "Lawson Nakagusuku Kuba",
             "nameZh": "羅森 中城久場店",
             "address": "",
@@ -125052,9 +125078,19 @@
             "nameZh": "西原閃閃沙灘",
             "address": "",
             "url": "https://maps.app.goo.gl/o44CWx3rzatAsQKE8",
-            "distance": 62.9,
+            "distance": 63.2,
             "tags": [
               "Toilet",
+              "Scenery"
+            ]
+          },
+          {
+            "nameEn": "Cape Chinen Park",
+            "nameZh": "知念岬公園",
+            "address": "",
+            "url": "https://maps.app.goo.gl/hZt6BRzdTrfVFnkw7",
+            "distance": 78.4,
+            "tags": [
               "Scenery"
             ]
           },
@@ -125063,7 +125099,7 @@
             "nameZh": "優因池酒店",
             "address": "",
             "url": "https://maps.app.goo.gl/foCnhGe1JaVdWbtR7",
-            "distance": 71,
+            "distance": 86.4,
             "tags": [
               "Hotel"
             ]
@@ -149496,14 +149532,12 @@
             ]
           },
           {
-            "nameEn": "Cape Chinen Park",
-            "nameZh": "知念岬公園",
+            "nameEn": "Nirai Kanai Observatory",
+            "nameZh": "日落海灘觀景台",
             "address": "",
-            "url": "https://maps.app.goo.gl/zVzAwxfNVKG4KAWp7",
-            "distance": 15.6,
+            "url": "https://maps.app.goo.gl/qmuXc4FyWz5Mhzz46",
+            "distance": 5.6,
             "tags": [
-              "Food",
-              "Toilet",
               "Scenery"
             ]
           },
@@ -149512,7 +149546,7 @@
             "nameZh": "沖永良部島今井遊市場",
             "address": "",
             "url": "https://maps.app.goo.gl/kMm8shamXxc8sS9A8",
-            "distance": 26.3,
+            "distance": 16.4,
             "tags": [
               "Food",
               "Toilet"
@@ -149563,7 +149597,7 @@
             ]
           },
           {
-            "nameEn": "Okinawa Ringyo Co. Ltd ‒ Maejima 2nd Branch",
+            "nameEn": "Okinawa Ringyo Co.,Ltd _ Maejima 2nd Branch",
             "nameZh": "沖繩林業株式會社前島第二分店",
             "address": "",
             "url": "https://maps.app.goo.gl/Dx5gfeK5g4QEXq9z5",

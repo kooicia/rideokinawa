@@ -1471,14 +1471,19 @@ export default function AdminPage() {
                                       'tags', 'tag', 'category', 'categories', '標籤'
                                     ]);
                                     
+                                    // Find Day column index
+                                    const dayIndex = findColumnIndex(headers, [
+                                      'day', 'days', 'day number', '天', '天數'
+                                    ]);
+                                    
                                     // Validate required columns
                                     if (finalNameEnIndex === -1 && nameZhIndex === -1) {
                                       alert('CSV must contain at least one name column (English or Chinese).');
                                       return;
                                     }
                                     
-                                    // Parse data rows
-                                    const stops: any[] = [];
+                                    // Parse data rows and group by day
+                                    const stopsByDay: Record<number, any[]> = {};
                                     for (let i = 1; i < lines.length; i++) {
                                       const line = lines[i].trim();
                                       if (!line) continue;
@@ -1488,6 +1493,18 @@ export default function AdminPage() {
                                       // Debug: Log first row values for troubleshooting
                                       if (i === 1) {
                                         console.log('First data row values:', values);
+                                      }
+                                      
+                                      // Extract day number (default to current day if not specified)
+                                      let dayNumber = index + 1; // Default to current day (1-indexed)
+                                      if (dayIndex >= 0 && dayIndex < values.length) {
+                                        const dayStr = (values[dayIndex] || '').trim();
+                                        if (dayStr) {
+                                          const parsedDay = parseInt(dayStr, 10);
+                                          if (!isNaN(parsedDay) && parsedDay > 0) {
+                                            dayNumber = parsedDay;
+                                          }
+                                        }
                                       }
                                       
                                       // Extract values using mapped indices (preserve Chinese characters)
@@ -1528,12 +1545,15 @@ export default function AdminPage() {
                                       
                                       // Debug: Log extracted values for first row
                                       if (i === 1) {
-                                        console.log('Extracted values - nameEn:', nameEn, 'nameZh:', nameZh);
+                                        console.log('Extracted values - day:', dayNumber, 'nameEn:', nameEn, 'nameZh:', nameZh);
                                       }
                                       
                                       // Only add if at least one name is present
                                       if (nameEn || nameZh) {
-                                        stops.push({
+                                        if (!stopsByDay[dayNumber]) {
+                                          stopsByDay[dayNumber] = [];
+                                        }
+                                        stopsByDay[dayNumber].push({
                                           nameEn: nameEn,
                                           nameZh: nameZh,
                                           address: address,
@@ -1544,15 +1564,65 @@ export default function AdminPage() {
                                       }
                                     }
                                     
-                                    if (stops.length > 0) {
-                                      const newItinerary = [...data.itinerary];
-                                      const currentDay = newItinerary[index] as any;
-                                      if (!currentDay.routeDetails) {
-                                        currentDay.routeDetails = { enabled: true, stops: [] };
+                                    // Apply stops to appropriate days
+                                    if (Object.keys(stopsByDay).length > 0) {
+                                      // Check if this is a multi-day import and if there's existing route data
+                                      const isMultiDayImport = dayIndex !== -1 && Object.keys(stopsByDay).length > 1;
+                                      const affectedDays = Object.keys(stopsByDay).map(k => parseInt(k, 10));
+                                      
+                                      // Check if any affected days have existing route details
+                                      let hasExistingData = false;
+                                      if (isMultiDayImport) {
+                                        for (const dayNum of affectedDays) {
+                                          const dayIndexInArray = dayNum - 1;
+                                          if (dayIndexInArray >= 0 && dayIndexInArray < data.itinerary.length) {
+                                            const day = data.itinerary[dayIndexInArray] as any;
+                                            if (day.routeDetails?.stops && day.routeDetails.stops.length > 0) {
+                                              hasExistingData = true;
+                                              break;
+                                            }
+                                          }
+                                        }
                                       }
-                                      currentDay.routeDetails.stops = stops;
+                                      
+                                      // Ask for confirmation if multi-day import with existing data
+                                      if (isMultiDayImport && hasExistingData) {
+                                        const daysList = affectedDays.sort((a, b) => a - b).join(', ');
+                                        const confirmMessage = `This CSV contains route details for multiple days (${daysList}).\n\nSome of these days already have existing route details. Do you want to clear the existing route info and replace it with the data from the CSV file?`;
+                                        
+                                        if (!confirm(confirmMessage)) {
+                                          // User cancelled - abort import
+                                          return;
+                                        }
+                                      }
+                                      
+                                      const newItinerary = [...data.itinerary];
+                                      let totalStops = 0;
+                                      
+                                      // Update each day that has stops
+                                      Object.keys(stopsByDay).forEach(dayKey => {
+                                        const dayNum = parseInt(dayKey, 10);
+                                        const dayIndexInArray = dayNum - 1; // Convert to 0-indexed
+                                        
+                                        // Validate day number is within range
+                                        if (dayIndexInArray >= 0 && dayIndexInArray < newItinerary.length) {
+                                          const targetDay = newItinerary[dayIndexInArray] as any;
+                                          if (!targetDay.routeDetails) {
+                                            targetDay.routeDetails = { enabled: true, stops: [] };
+                                          }
+                                          // Replace existing stops with CSV data
+                                          targetDay.routeDetails.stops = stopsByDay[dayNum];
+                                          targetDay.routeDetails.enabled = true;
+                                          totalStops += stopsByDay[dayNum].length;
+                                        } else {
+                                          console.warn(`Day ${dayNum} is out of range. Available days: 1-${newItinerary.length}`);
+                                        }
+                                      });
+                                      
                                       setData({ ...data, itinerary: newItinerary });
-                                      alert(`Imported ${stops.length} route stop(s) from CSV.`);
+                                      
+                                      const daysUpdated = Object.keys(stopsByDay).length;
+                                      alert(`Imported ${totalStops} route stop(s) from CSV across ${daysUpdated} day(s).`);
                                     } else {
                                       alert('No valid route stops found in CSV file. Please ensure at least one name column is present.');
                                     }
